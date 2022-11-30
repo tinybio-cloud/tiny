@@ -17,9 +17,6 @@ pip install .
 ```
 from tiny.rnaseq import RNASeq
 
-# storage
-import tiny
-
 rna_job = RNASeq(
     core_data='core-dataset', 
     fasta_file='core_ref/genome.fa', 
@@ -46,5 +43,4 @@ rna_job.upload_data()
 >>> File samplesheet_core.csv uploaded to input/samplesheet_core.csv
 
 rna_job.run()
-
 ```

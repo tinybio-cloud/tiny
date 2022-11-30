@@ -1,15 +1,11 @@
-import time
-import json
 from datetime import datetime
 
-from google.cloud import workflows_v1beta
-from google.cloud.workflows import executions_v1beta
-from google.cloud.workflows.executions_v1beta.types import executions, Execution
-
 from .storage import create_bucket, upload_files
+from .workflow import execute, get_execution
 
 
 class RNASeq():
+    WORKFLOW = 'rnaseq_alpha'
     def __init__(self, core_data: str, fasta_file: str, gtf_file: str, sample_sheet: str):
         self.local_core_data = core_data
         self.local_fasta_file = fasta_file
@@ -19,6 +15,8 @@ class RNASeq():
         self.sample_sheet_cloud_path = None
         self.gtf_cloud_path = None
         self.fasta_cloud_path = None
+        self.workflow_name = None
+        self.workflow_execution = None
 
     def _create_bucket(self):
         bucket_name = f"rnaseq-{datetime.now().strftime('%Y%m%d%H%M%S%f')}"
@@ -47,10 +45,10 @@ class RNASeq():
         self.sample_sheet_cloud_path = sample_sheet_path_mapping[self.local_sample_sheet]
 
     def run(self):
-        # TODO: move these to constants
-        project = 'nextflow-test-366601'
-        location = 'us-central1'
-        workflow = 'rnaseq_alpha'
+        if not (self.bucket_name or self.sample_sheet_cloud_path or self.gtf_cloud_path or self.fasta_cloud_path):
+            raise Exception("Data not uploaded")
+
+        workflow: str = 'rnaseq_alpha'
         arguments = {
             "existingBucket": True,
             "fastaPath": self.fasta_cloud_path,
@@ -59,35 +57,15 @@ class RNASeq():
             "sampleSheet": self.sample_sheet_cloud_path,
         }
 
-        if not project:
-            raise Exception('GOOGLE_CLOUD_PROJECT env var is required.')
+        self.workflow_name = execute(arguments, workflow)
+        print(f"Created execution: {self.workflow_name}")
 
-        # Set up API clients.
-        execution_client = executions_v1beta.ExecutionsClient()
-        workflows_client = workflows_v1beta.WorkflowsClient()
+    def get_status(self):
+        execution = get_execution(self.workflow_name)
+        print(f"Execution status: {execution.state.name}")
+        if execution.result:
+            print(f"Execution result: {execution.result}")
+        if execution.error:
+            print(f"Execution result: {execution.error}")
 
-        # Construct the fully qualified location path.
-        parent = workflows_client.workflow_path(project, location, workflow)
-
-        # Execute the workflow.
-        execution = Execution(argument=json.dumps(arguments))
-        response = execution_client.create_execution(request={"parent": parent, "execution": execution})
-        print(f"Created execution: {response.name}")
-
-        # Wait for execution to finish, then print results.
-        execution_finished = False
-        backoff_delay = 1  # Start wait with delay of 1 second
-        print('Poll every second for result...')
-        while not execution_finished:
-            execution = execution_client.get_execution(request={"name": response.name})
-            execution_finished = execution.state != executions.Execution.State.ACTIVE
-
-            # If we haven't seen the result yet, wait a second.
-            if not execution_finished:
-                print('- Waiting for results...')
-                time.sleep(backoff_delay)
-                backoff_delay *= 2  # Double the delay to provide exponential backoff.
-            else:
-                print(f'Execution finished with state: {execution.state.name}')
-                print(execution.result)
-                return execution.result
+        self.workflow_execution = execution
