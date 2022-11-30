@@ -6,6 +6,7 @@ def readme():
 
 dependencies = [
     "google-cloud-storage==2.6.0",
+    "google-cloud-workflows==1.7.4",
 ]
 
 setup(
