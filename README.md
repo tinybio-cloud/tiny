@@ -43,4 +43,7 @@ rna_job.upload_data()
 >>> File samplesheet_core.csv uploaded to input/samplesheet_core.csv
 
 rna_job.run()
+
+rna_job.get_status()
+>>> Execution status: ACTIVE
 ```
