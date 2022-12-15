@@ -2,7 +2,7 @@ import json
 from os import listdir
 from os.path import isfile, join, isdir, split
 
-import requests
+import httpx
 
 from .settings import PROD_BASE_URL
 
@@ -18,7 +18,7 @@ def download_file(bucket_name: str, remote_file: str) -> json:
     """
     query_params = {'file_path': remote_file}
     url = f"{PROD_BASE_URL}/download/{bucket_name}"
-    r = requests.get(url, params=query_params)
+    r = httpx.get(url, params=query_params)
     if r.status_code != 200:
         raise Exception(f"Error downloading file {remote_file} from bucket {bucket_name}")
 
@@ -32,7 +32,7 @@ def list_files_in_bucket(bucket_name: str) -> json:
     :return:
     """
     url = f"{PROD_BASE_URL}/{bucket_name}"
-    r = requests.get(url)
+    r = httpx.get(url)
     if r.status_code != 200:
         raise Exception(f"Error listing files in bucket {bucket_name}")
 
@@ -52,7 +52,7 @@ def _upload_blob(bucket_name: str, source_file_name: str) -> json:
     # r = requests.post(url, data=m, headers={'Content-Type': m.content_type})
     files = {'file': open(source_file_name, 'rb')}
     print(f'Uploading {source_file_name} to {bucket_name}')
-    r = requests.post(url, files=files)
+    r = httpx.post(url, files=files)
     if r.status_code != 200:
         print(r.text)
         raise Exception(f"Error uploading file {source_file_name} to bucket {bucket_name}")

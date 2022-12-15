@@ -7,13 +7,12 @@ def readme():
 
 
 dependencies = [
-    "requests==2.28.1",
-    "requests-toolbelt==0.10.1",
+    "httpx==0.23.1"
 ]
 
 setup(
     name='tiny-cli',
-    version='0.1',
+    version='0.6',
     description='TinyBio genome analysis tool',
     long_description_content_type='text/markdown',
     url='https://github.com/tinybio-cloud/tiny',
@@ -23,6 +22,6 @@ setup(
     license='MIT',
     packages=['tiny'],
     install_requires=dependencies,
-    python_requires=">=3.10",
+    python_requires=">=3.7",
     zip_safe=False
 )

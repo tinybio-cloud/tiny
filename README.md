@@ -15,35 +15,42 @@ pip install .
 
 ### Usage
 ```
-from tiny.rnaseq import RNASeq
+import tiny
 
-rna_job = RNASeq(
-    core_data='core-dataset', 
-    fasta_file='core_ref/genome.fa', 
-    gtf_file='core_ref/genes.gtf', 
-    sample_sheet='samplesheet_core.csv'
+samtools = tiny.Job(
+    tool="samtools",
+    command="view",
+    flags=["-h"],
+    input=["/path/to/input.bam"],
+    output=["/path/to/output.sam"],
+    bucket_name="my-bucket",
 )
 
-rna_job.upload_data()
->>> output/ with contents  uploaded to rnaseq-20221130113524359827.
->>> working/ with contents  uploaded to rnaseq-20221130113524359827.
->>> Created bucket rnaseq-20221130113524359827 in US with storage class COLDLINE
->>> File core-dataset/SRR6357072_2.fastq.gz uploaded to input/core-dataset/SRR6357072_2.fastq.gz
->>> File core-dataset/SRR6357081_1.fastq.gz uploaded to input/core-dataset/SRR6357081_1.fastq.gz
->>> File core-dataset/SRR6357080_2.fastq.gz uploaded to input/core-dataset/SRR6357080_2.fastq.gz
->>> File core-dataset/SRR6357073_1.fastq.gz uploaded to input/core-dataset/SRR6357073_1.fastq.gz
->>> File core-dataset/SRR6357076_1.fastq.gz uploaded to input/core-dataset/SRR6357076_1.fastq.gz
->>> File core-dataset/SRR6357077_2.fastq.gz uploaded to input/core-dataset/SRR6357077_2.fastq.gz
->>> File core-dataset/SRR6357070_2.fastq.gz uploaded to input/core-dataset/SRR6357070_2.fastq.gz
->>> File core-dataset/SRR6357071_1.fastq.gz uploaded to input/core-dataset/SRR6357071_1.fastq.gz
->>> File core-dataset/SRR6357078_2.fastq.gz uploaded to input/core-dataset/SRR6357078_2.fastq.gz
->>> ... 10 more files
->>> File core_ref/genome.fa uploaded to input/genome.fa
->>> File core_ref/genes.gtf uploaded to input/genes.gtf
->>> File samplesheet_core.csv uploaded to input/samplesheet_core.csv
+# Run the job
+>>> samtools.run()
+{'input': 'input/wgEncodeRikenCageGm12878CellPapAlnRep1.bam', 'output': 'cli-test-out.sam', 'bucket_name': 'samtools-test-20221208212343699098', 'command': 'view', 'flags': ['-h'], 'id': '7d01ec8c-7c12-491b-b50e-fe7e6a1c67f4', 'repr': 'samtools view -h -o cli-test-out.sam input/wgEncodeRikenCageGm12878CellPapAlnRep1.bam'}
 
-rna_job.run()
+# Check the status
+>>> samtools.status()
+{'workflow_id': '7d01ec8c-7c12-491b-b50e-fe7e6a1c67f4', 'workflow_name': 'samtools', 'state': 'ACTIVE'}
 
-rna_job.get_status()
->>> Execution status: ACTIVE
+# Download the output file
+>>> samtools.download('cli-test-out.sam')
+{'download_url': 'https://storage.googleapis.com/samtools-test-20221208212343699098/cli-test-out.sam?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=tiny-api%40nextflow-test-366601.iam.gserviceaccount.com%2F20221215%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20221215T181037Z&X-Goog-Expires=3600&X-Goog-SignedHeaders=host&X-Goog-Signature=2f9fe015912c436d5be285853e51c1897189d1df9ac66fdae68a11d69535ddaafbc54923d24a9044608390c74e54c9ebf924f62957d9d47aa69112d4788b6bd1020f435ab27069d4f5a9df816fd98f6967c5b1cf6eaf95cc978bf8d245202f4e5a3dd58f4b17ed84221f5e73f74ea78e6a4459b9998b5194ebe3a86a2f9ad7f0517d0fd0297e6a02f3e856baa85ee341afe7c26e788f687ba5632a2e3db4729e17f53c37bd5d5592fe22e9acbdde396c111a22dabeb4a28023e493ff1113489e4f815a96d37c9eab3830b5613fb93ae396ca3aa829b475c885073497371c592dd6923d82d6c7182674a0015bedaae2916b91802d0be6d61bd109d253d3024ebc'}
+
+# Upload a file
+>>> samtools.upload('/path/to/file/samplesheet_core.csv')
+Uploading /path/to/file/samplesheet_core.csv to samtools-test-20221208212343699098
+{'/path/to/file/samplesheet_core.csv': 'input/samplesheet_core.csv'}
+
+# list files in bucket
+>>> samtools.list_files()
+['input/', 'input/wgEncodeRikenCageGm12878CellPapAlnRep1.bam', 'output/', 'output/cli-test-out.sam', 'working/']
+```
+
+### Distribute package to PIP
+```shell
+# bump version in setup.py
+python setup.py sdist
+twine upload dist/tiny-cli-{version}.tar.gz
 ```
