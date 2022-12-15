@@ -1,1 +1,1 @@
-import
+from .main import Job
