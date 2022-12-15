@@ -1,28 +1,21 @@
 import json
 
-from google.cloud import workflows_v1beta
-from google.cloud.workflows import executions_v1beta
-from google.cloud.workflows.executions_v1beta.types import executions, Execution
+import requests
 
-PROJECT = 'nextflow-test-366601'
-LOCATION = 'us-central1'
+from .settings import PROD_BASE_URL
 
 
-def execute(arguments: dict, workflow: str) -> str:
-    # Set up API clients.
-    execution_client = executions_v1beta.ExecutionsClient()
-    workflows_client = workflows_v1beta.WorkflowsClient()
-
-    # Construct the fully qualified location path.
-    parent = workflows_client.workflow_path(PROJECT, LOCATION, workflow)
-
-    # Execute the workflow.
-    execution = Execution(argument=json.dumps(arguments))
-    response = execution_client.create_execution(request={"parent": parent, "execution": execution})
-    return response.name
+def execute_workflow(tool: str, arguments: dict) -> json:
+    url = f'{PROD_BASE_URL}/jobs/{tool}'
+    r = requests.post(url=url, json=arguments)
+    if r.status_code != 200:
+        raise Exception(f'Failed to execute job: {r.text}')
+    return r.json()
 
 
-def get_execution(execution_name: str) -> Execution:
-    execution_client = executions_v1beta.ExecutionsClient()
-    execution = execution_client.get_execution(request={"name": execution_name})
-    return execution
+def get_workflow(tool: str, execution_id: str) -> json:
+    url = f'{PROD_BASE_URL}/jobs/{tool}/{execution_id}'
+    r = requests.get(url=url)
+    if r.status_code != 200:
+        raise Exception(f'Failed to get job: {r.text}')
+    return r.json()
