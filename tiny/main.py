@@ -6,8 +6,15 @@ from .workflow import execute_workflow, get_workflow
 
 class Job:
     # TODO: handle multiple inputs
-    def __init__(self, tool: str, input_file: str, output_file: str, bucket_name: str, command: str,
-                 flags: list = None):
+    def __init__(
+            self,
+            tool: str,
+            workbench: str,
+            input_file: str = None,
+            output_file: str = None,
+            command: str = None,
+            flags: list = None
+    ):
         if flags is None:
             self.flags = list()
         else:
@@ -17,7 +24,7 @@ class Job:
         self.input_file = input_file
         self.output_file = output_file
         self.command = command
-        self.bucket_name = bucket_name
+        self.bucket_name = workbench
         self.input_uploaded = False
         self.remote_input_file_path = None
         self.execution_id = None
@@ -43,18 +50,20 @@ class Job:
         input_file_path = f'input/{file}'
         return input_file_path in list_files_in_bucket(self.bucket_name), input_file_path
 
-    def run(self):
-        file_exists, path = self.file_exists_in_bucket(self.input_file)
-        if file_exists:
-            self.remote_input_file_path = path
-        if not self.remote_input_file_path:
-            self.upload(self.input_file)
+    def run(self, full_command: str = None):
+        if self.input_file:
+            file_exists, path = self.file_exists_in_bucket(self.input_file)
+            if file_exists:
+                self.remote_input_file_path = path
+            if not self.remote_input_file_path:
+                self.upload(self.input_file)
         arguments = {
             'input': self.remote_input_file_path,
             'output': self.output_file,
             'bucket_name': self.bucket_name,
             'command': self.command,
-            'flags': self.flags
+            'flags': self.flags,
+            'full_command': full_command
         }
         execution = execute_workflow(self.tool, arguments)
         self.execution_id = execution.get('id')

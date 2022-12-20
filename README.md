@@ -23,7 +23,7 @@ samtools = tiny.Job(
     flags=["-h"],
     input=["/path/to/input.bam"],
     output=["/path/to/output.sam"],
-    bucket_name="my-bucket",
+    workbench="my-bucket",
 )
 
 # Run the job
@@ -46,6 +46,14 @@ Uploading /path/to/file/samplesheet_core.csv to samtools-test-202212082123436990
 # list files in bucket
 >>> samtools.list_files()
 ['input/', 'input/wgEncodeRikenCageGm12878CellPapAlnRep1.bam', 'output/', 'output/cli-test-out.sam', 'working/']
+```
+
+```shell
+# Run Job with full command
+samtools = tiny.Job(tool='samtools', workbench='my-bucket')
+samtools.run("view -h -o cli-test-out.sam /mnt/gcs/input/wgEncodeRikenCageGm12878CellPapAlnRep1.bam")
+
+samtools.status()
 ```
 
 ### Distribute package to PIP
