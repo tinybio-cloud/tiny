@@ -66,7 +66,7 @@ class Job:
             'full_command': full_command,
             'tool': self.tool,
         }
-        execution = execute_workflow(self.tool, arguments)
+        execution = execute_workflow("main", arguments)
         self.execution_id = execution.get('id')
         return execution
 

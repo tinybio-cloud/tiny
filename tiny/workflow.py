@@ -5,8 +5,8 @@ import httpx
 from .settings import PROD_BASE_URL
 
 
-def execute_workflow(tool: str, arguments: dict) -> json:
-    url = f'{PROD_BASE_URL}/jobs/{tool}'
+def execute_workflow(workflow: str, arguments: dict) -> json:
+    url = f'{PROD_BASE_URL}/jobs/{workflow}'
     r = httpx.post(url=url, json=arguments)
     if r.status_code != 200:
         raise Exception(f'Failed to execute job: {r.text}')
