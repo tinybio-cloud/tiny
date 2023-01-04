@@ -63,7 +63,8 @@ class Job:
             'bucket_name': self.bucket_name,
             'command': self.command,
             'flags': self.flags,
-            'full_command': full_command
+            'full_command': full_command,
+            'tool': self.tool,
         }
         execution = execute_workflow(self.tool, arguments)
         self.execution_id = execution.get('id')
