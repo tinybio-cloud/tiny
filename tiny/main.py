@@ -66,11 +66,11 @@ class Job:
             'full_command': full_command,
             'tool': self.tool,
         }
-        execution = execute_workflow("main", arguments)
+        execution = execute_workflow(arguments)
         self.execution_id = execution.get('id')
         return execution
 
     def status(self):
         if not self.execution_id:
             raise Exception('Job not started')
-        return get_workflow("main", self.execution_id)
+        return get_workflow(self.execution_id)
