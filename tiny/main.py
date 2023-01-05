@@ -73,4 +73,4 @@ class Job:
     def status(self):
         if not self.execution_id:
             raise Exception('Job not started')
-        return get_workflow(self.tool, self.execution_id)
+        return get_workflow("main", self.execution_id)
