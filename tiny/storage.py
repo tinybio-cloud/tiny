@@ -17,7 +17,7 @@ def download_file(bucket_name: str, remote_file: str) -> json:
     :return:
     """
     query_params = {'file_path': remote_file}
-    url = f"{PROD_BASE_URL}/download/{bucket_name}"
+    url = f"{PROD_BASE_URL}/workbench/{bucket_name}/download"
     r = httpx.get(url, params=query_params)
     if r.status_code != 200:
         raise Exception(f"Error downloading file {remote_file} from bucket {bucket_name}")
@@ -31,8 +31,8 @@ def list_files_in_bucket(bucket_name: str) -> json:
     :param bucket_name: name of bucket
     :return:
     """
-    url = f"{PROD_BASE_URL}/{bucket_name}"
-    r = httpx.get(url)
+    url = f"{PROD_BASE_URL}/workbench/{bucket_name}"
+    r = httpx.get(url, timeout=None)
     if r.status_code != 200:
         raise Exception(f"Error listing files in bucket {bucket_name}")
 
@@ -47,12 +47,12 @@ def _upload_blob(bucket_name: str, source_file_name: str) -> json:
     # source_file_name = "local/path/to/file"
 
     # from requests_toolbelt import MultipartEncoder
-    url = f"{PROD_BASE_URL}/upload/{bucket_name}"
+    url = f"{PROD_BASE_URL}/workbench/{bucket_name}/upload"
     # m = MultipartEncoder(fields={'file': (source_file_name, open(source_file_name, 'rb'))})
     # r = requests.post(url, data=m, headers={'Content-Type': m.content_type})
     files = {'file': open(source_file_name, 'rb')}
     print(f'Uploading {source_file_name} to {bucket_name}')
-    r = httpx.post(url, files=files)
+    r = httpx.post(url, files=files, timeout=None)
     if r.status_code != 200:
         print(r.text)
         raise Exception(f"Error uploading file {source_file_name} to bucket {bucket_name}")
