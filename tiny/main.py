@@ -21,8 +21,11 @@ from .settings import PROD_BASE_URL
 class Workbench:
     def __init__(self, bucket_name: str, auth_token: str = None):
         if not auth_token:
-            login_url = f'{PROD_BASE_URL}/auth/login'
-            raise Exception(f'Please provide an auth token to get an auth token login via {login_url}')
+            login_url = f'{PROD_BASE_URL}/auth/google/authorize'
+            response = httpx.get(login_url)
+            if response.status_code == 200:
+                auth_url = response.json().get('authorization_url')
+                raise Exception(f'Please provide an auth token to get an auth token login via {auth_url}')
 
         self.bucket_name = bucket_name
         self.jobs = []
