@@ -1,6 +1,7 @@
 import json
 from os import listdir
 from os.path import isfile, join, isdir, split
+from typing import List, Tuple, Any
 
 import httpx
 
@@ -102,3 +103,31 @@ def upload_files(bucket_name: str, local_files: str, auth_token: str) -> dict:
         return file_mapping
     except Exception as e:
         raise e
+
+
+def upload_file_path(bucket_name: str, files: List[Tuple[str, str]], auth_token: str, method: str = 'curl') -> list[Any]:
+    """
+    creates a job that will download a list or single files to a bucket
+    :param bucket_name: name of bucket
+    :param files: list of tuples (url, output path)
+    :param auth_token: auth token provided by logging in
+    :param method: method to use to download file
+    :return:
+    """
+    response = []
+    for file in files:
+        input_url = file[0]
+        output_path = file[1]
+        url = f"{PROD_BASE_URL}/workbench/{bucket_name}/upload/file-url"
+        headers = {'Authorization': f'Bearer {auth_token}'}
+        data = {
+            'input_url': input_url,
+            'output_path': output_path,
+            'method': method
+        }
+        r = httpx.post(url, headers=headers, json=data)
+        if r.status_code != 200:
+            raise Exception(r.content)
+
+        response.append(r.json())
+    return response
