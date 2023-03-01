@@ -1,21 +1,11 @@
 from datetime import datetime
+from typing import List, Tuple
+
 import httpx
 
-from .storage import upload_files, download_file, list_files_in_bucket
+from .storage import upload_files, download_file, list_files_in_bucket, upload_file_path
 from .workflow import execute_workflow, get_job, get_job_logs
 from .settings import PROD_BASE_URL
-
-
-
-# class Auth:
-#     def __init__(self, token: str = None):
-#         self.token = token
-#         if self.token is None:
-#             self.login()
-#
-#     @staticmethod
-#     def login():
-#         return f'{PROD_BASE_URL}/auth/login'
 
 
 class Workbench:
@@ -41,7 +31,7 @@ class Workbench:
         self.jobs.append(job)
         return job
 
-    def upload(self, file) -> dict:
+    def upload_file(self, file) -> dict:
         uploaded_files = upload_files(self.bucket_name, file, auth_token=self.auth_token)
         return uploaded_files
 
@@ -54,6 +44,12 @@ class Workbench:
 
     def list_files(self):
         return list_files_in_bucket(self.bucket_name, auth_token=self.auth_token)
+
+    def upload_job(self, files: List[Tuple[str, str]], method: str = 'curl'):
+        upload_jobs = upload_file_path(self.bucket_name, files=files, method=method, auth_token=self.auth_token)
+        for job in upload_jobs:
+            self.jobs.append(Job(job_id=job.get('id'), tool=method, full_command=f'{method} {job.get("input")}', workbench=self))
+        return upload_jobs
 
 
 class Job:
