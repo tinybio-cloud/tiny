@@ -18,8 +18,15 @@ class Workbench:
                 raise Exception(f'Please provide an auth token to get an auth token login via {auth_url}')
 
         self.bucket_name = bucket_name
-        self.jobs = []
+        self.jobs = {}
         self.auth_token = auth_token
+
+    def _add_job(self, job: 'Job'):
+        self.jobs[job.job_id] = job
+
+    def remove_job(self, job_id):
+        if job_id in self.jobs:
+            del self.jobs[job_id]
 
     def run(self, tool: str, full_command: str):
         arguments = {
@@ -28,7 +35,7 @@ class Workbench:
         }
         execution = execute_workflow(self.bucket_name, arguments, auth_token=self.auth_token)
         job = Job(job_id=execution.get('id'), tool=execution.get('tool'), full_command=execution.get('full_command'), workbench=self)
-        self.jobs.append(job)
+        self._add_job(job)
         return job
 
     def upload_file(self, file) -> dict:
@@ -48,7 +55,8 @@ class Workbench:
     def upload_job(self, files: List[Tuple[str, str]], method: str = 'curl'):
         upload_jobs = upload_file_path(self.bucket_name, files=files, method=method, auth_token=self.auth_token)
         for job in upload_jobs:
-            self.jobs.append(Job(job_id=job.get('id'), tool=method, full_command=f'{method} {job.get("input")}', workbench=self))
+            job = Job(job_id=job.get('id'), tool=method, full_command=f'{method} {job.get("input")}', workbench=self)
+            self._add_job(job)
         return upload_jobs
 
 
