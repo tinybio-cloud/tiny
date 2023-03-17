@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import List, Tuple
 
 import httpx
+from tabulate import tabulate
 
 from .storage import upload_files, download_file, list_files_in_bucket, upload_file_path
 from .workflow import execute_workflow, get_job, get_job_logs
@@ -29,7 +30,13 @@ class Workbench:
         execution = execute_workflow(self.bucket_name, arguments, auth_token=self.auth_token)
         job = Job(job_id=execution.get('id'), tool=execution.get('tool'), full_command=execution.get('full_command'), workbench=self)
         self.jobs.append(job)
-        return job
+        # create a table with the relevant job information
+        table = [[job.job_id, job.tool, job.full_command, f"wb.('{job.job_id}').status()"] for job in self.jobs]
+        headers = ['Job ID', 'Tool', 'Full Command', 'status']
+
+        # format the table using tabulate
+        print(tabulate(table, headers=headers))
+        # return job
 
     def upload_file(self, file) -> dict:
         uploaded_files = upload_files(self.bucket_name, file, auth_token=self.auth_token)
