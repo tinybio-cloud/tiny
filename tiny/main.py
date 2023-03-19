@@ -2,10 +2,18 @@ from datetime import datetime
 from typing import List, Tuple
 
 import httpx
+from tabulate import tabulate
 
 from .storage import upload_files, download_file, list_files_in_bucket, upload_file_path
-from .workflow import execute_workflow, get_job, get_job_logs
+from .workflow import execute_workflow, get_job, get_job_logs, JobStatus
 from .settings import PROD_BASE_URL
+
+
+def print_table(headers, table_data):
+    """
+    Print table using specified headers, table data, format, and column width.
+    """
+    print(tabulate(table_data, headers=headers, tablefmt="grid", maxcolwidths=[None, None, 60, 60, 80]))
 
 
 class Auth:
@@ -15,7 +23,7 @@ class Auth:
         if not self.access_token:
             self.authenticate()
 
-    def __str__(self):
+    def __repr__(self):
         return self.access_token
 
     def authenticate(self):
@@ -41,7 +49,7 @@ class Auth:
 class Workbench:
     def __init__(self, bucket_name: str, auth: Auth = None):
         self.bucket_name = bucket_name
-        self.jobs = {}
+        self._jobs = {}
 
         if not auth:
             self.auth = Auth()
@@ -50,11 +58,11 @@ class Workbench:
             self.auth = auth
 
     def _add_job(self, job: 'Job'):
-        self.jobs[job.job_id] = job
+        self._jobs[job.job_id] = job
 
     def remove_job(self, job_id):
-        if job_id in self.jobs:
-            del self.jobs[job_id]
+        if job_id in self._jobs:
+            del self._jobs[job_id]
 
     def run(self, tool: str, full_command: str):
         arguments = {
@@ -62,10 +70,19 @@ class Workbench:
             'tool': tool,
         }
         execution = execute_workflow(self.bucket_name, arguments, auth_token=self.auth.get_access_token())
-        job = Job(job_id=execution.get('id'), tool=execution.get('tool'), full_command=execution.get('full_command'),
-                  workbench=self)
+        job = Job(
+            job_id=execution.get('id'),
+            tool=execution.get('tool'),
+            full_command=execution.get('full_command'),
+            workbench=self
+        )
         self._add_job(job)
-        return job
+        get_logs = f"workbench.jobs['{job.job_id}'].logs()"
+        table = [[job.job_id, job.tool, job.status, get_logs, job.full_command]]
+        headers = ['Job ID', 'Tool', 'Status', 'Get Logs', 'Full Command']
+
+        # format the table using tabulate
+        print_table(headers, table)
 
     def upload_file(self, file) -> dict:
         uploaded_files = upload_files(self.bucket_name, file, auth_token=self.auth.get_access_token())
@@ -85,10 +102,26 @@ class Workbench:
     def upload_job(self, files: List[Tuple[str, str]], method: str = 'curl'):
         upload_jobs = upload_file_path(self.bucket_name, files=files, method=method,
                                        auth_token=self.auth.get_access_token())
+        table = []
         for job in upload_jobs:
             job = Job(job_id=job.get('id'), tool=method, full_command=f'{method} {job.get("input")}', workbench=self)
+            row = [job.job_id, job.tool, job.status, f"workbench.jobs['{job.job_id}'].logs()", job.full_command]
             self._add_job(job)
-        return upload_jobs
+            table.append(row)
+        headers = ['Job ID', 'Tool', 'Status', 'Get Logs', 'Full Command']
+        print_table(headers, table)
+
+    def jobs(self):
+        table = []
+        for job in self._jobs.values():
+            job.status = job.get_status()
+            row = [job.job_id, job.tool, job.status, f"workbench.jobs['{job.job_id}'].logs()", job.full_command]
+            table.append(row)
+
+        headers = ['Job ID', 'Tool', 'Status', 'Get Logs', 'Full Command']
+
+        # format the table using tabulate
+        print_table(headers, table)
 
 
 class Job:
@@ -98,17 +131,20 @@ class Job:
             tool: str,
             full_command: str,
             workbench: Workbench,
+            status: str = JobStatus.QUEUED,
     ):
         self.job_id = job_id
         self.tool = tool
         self.full_command = full_command
         self.workbench = workbench
+        self.status = status
 
-    def __repr__(self):
-        return f'{self.job_id} running {self.full_command}'
-
-    def status(self):
-        return get_job(self.job_id, auth_token=self.workbench.auth.get_access_token())
+    def get_status(self):
+        if self.status in [JobStatus.SUCCEEDED, JobStatus.FAILED, JobStatus.DELETION_IN_PROGRESS]:
+            return self.status
+        status = get_job(self.job_id, auth_token=self.workbench.auth.get_access_token())
+        self.status = status
+        return status.__str__()
 
     def logs(self):
         return get_job_logs(self.job_id, auth_token=self.workbench.auth.get_access_token())

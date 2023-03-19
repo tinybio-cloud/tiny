@@ -1,3 +1,4 @@
+import enum
 import json
 
 import httpx
@@ -14,13 +15,46 @@ def execute_workflow(bucket_name: str, arguments: dict, auth_token: str) -> json
     return r.json()
 
 
+class JobStatus(enum.Enum):
+    STATE_UNSPECIFIED = 'State.STATE_UNSPECIFIED'
+    QUEUED = 'State.QUEUED'
+    SCHEDULED = 'State.SCHEDULED'
+    RUNNING = 'State.RUNNING'
+    SUCCEEDED = 'State.SUCCEEDED'
+    FAILED = 'State.FAILED'
+    DELETION_IN_PROGRESS = 'State.DELETION_IN_PROGRESS'
+
+    STATUS_CHOICES = (
+        (STATE_UNSPECIFIED, 'State unspecified'),
+        (QUEUED, 'Queued'),
+        (SCHEDULED, 'Scheduled'),
+        (RUNNING, 'Running'),
+        (SUCCEEDED, 'Completed'),
+        (FAILED, 'Failed'),
+        (DELETION_IN_PROGRESS, 'Deletion in progress'),
+    )
+
+    def __str__(self):
+        rep_map = {
+            'State.STATE_UNSPECIFIED': 'State unspecified',
+            'State.QUEUED': 'Queued',
+            'State.SCHEDULED': 'Scheduled',
+            'State.RUNNING': 'Running',
+            'State.SUCCEEDED': 'Completed',
+            'State.FAILED': 'Failed',
+            'State.DELETION_IN_PROGRESS': 'Deletion in progress',
+        }
+        return rep_map.get(self.value)
+
+
 def get_job(job_id: str, auth_token: str) -> json:
     url = f'{PROD_BASE_URL}/jobs/{job_id}'
     headers = {'Authorization': f'Bearer {auth_token}'}
     r = httpx.get(url=url, headers=headers)
     if r.status_code != 200:
         raise Exception(f'Failed to get job: {r.text}')
-    return r.json()
+    state = r.json().get('state')
+    return JobStatus(state)
 
 
 def get_job_logs(job_id: str, auth_token: str) -> json:
