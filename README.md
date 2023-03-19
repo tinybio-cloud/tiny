@@ -21,8 +21,11 @@ get your auth token from https://tiny.bio/login
 
 >>> import tiny
 
+# Add your auth token
+>>> auth = tiny.Auth('YOUR_AUTH_TOKEN')
+
 # initialize your workbench
->>> workbench = tiny.Workbench('rna-seq-test', auth_token:{your_auth_token}})
+>>> workbench = tiny.Workbench('rna-seq-test', auth=auth)
 
 # Upload files to your workbench
 >>> workbench.upload('/path/to/file/samplesheet_core.csv')
@@ -32,15 +35,29 @@ Uploading /path/to/file/samplesheet_core.csv to samtools-test-202212082123436990
 # Run a job
 # all jobs run are stored as Job objects on the workbench to access them use workbench.jobs
 >>> fastqc = workbench.run(
-    tool="fastqc", 
-    full_command="fastqc -o /mnt/gcs/output/qc/raw_reads /mnt/gcs/input/core-dataset/*.fastq.gz"
+    tool="samtools", 
+    full_command="samtools quickcheck /mnt/gcs/output/mapping/sorted/CRR119890_Aligned_sorted.bam"
 )
++---------------------+----------+----------+----------------------------------------------+---------------------------------------------------------------------------------+
+| Job ID              | Tool     | Status   | Get Logs                                     | Full Command                                                                    |
++=====================+==========+==========+==============================================+=================================================================================+
+| samtools-9284deada3 | samtools | Queued   | workbench.jobs['samtools-9284deada3'].logs() | samtools quickcheck /mnt/gcs/output/mapping/sorted/CRR119890_Aligned_sorted.bam |
++---------------------+----------+----------+----------------------------------------------+---------------------------------------------------------------------------------+
 
-# Get status of a job
+# Get status of all jobs
+>>> workbench.jobs()
++---------------------+----------+-----------+----------------------------------------------+---------------------------------------------------------------------------------+
+| Job ID              | Tool     | Status    | Get Logs                                     | Full Command                                                                    |
++=====================+==========+===========+==============================================+=================================================================================+
+| samtools-9284deada3 | samtools | Scheduled | workbench.jobs['samtools-9284deada3'].logs() | samtools quickcheck /mnt/gcs/output/mapping/sorted/CRR119890_Aligned_sorted.bam |
++---------------------+----------+-----------+----------------------------------------------+---------------------------------------------------------------------------------+
+
+
+# Get status of a single job
 >>> fastqc.status()
 or
->>> workbench.jobs[0].status()
-{'id': 'job-fastqc-20230106-203225397382', 'state': 'State.QUEUED'}
+>>> workbench.jobs['jobID'].get_status()
+state.RUNNING
 
 # Get logs of a job
 >>> fastqc.logs()
@@ -70,23 +87,15 @@ files = [
 ]
 
 >>> workbench.upload_job(method='curl', files=files)
-[
-  {
-    "id": "job-curl-20230228-211507316504",
-    "workbench": "upload-urls-endpoint-test",
-    "method": "curl",
-    "input": "ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR102/093/SRR10261593/SRR10261593_1.fastq.gz",
-    "output": "input/sample_data/SRR10261593_ATAC-Seq_of_S._cerevisiae_at_30C_rep1_1.fastq.gz"
-  },
-  {
-    "id": "job-curl-20230228-211509236256",
-    "workbench": "upload-urls-endpoint-test",
-    "method": "curl",
-    "input": "ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR102/093/SRR10261593/SRR10261593_2.fastq.gz",
-    "output": "input/sample_data/SRR10261593_ATAC-Seq_of_S._cerevisiae_at_30C_rep1_2.fastq.gz"
-  }
-]
-
++-----------------+--------+----------+------------------------------------------+----------------------------------------------------------------------------------+
+| Job ID          | Tool   | Status   | Get Logs                                 | Full Command                                                                     |
++=================+========+==========+==========================================+==================================================================================+
+| curl-e129d17f4c | curl   | Queued   | workbench.jobs['curl-e129d17f4c'].logs() | curl                                                                             |
+|                 |        |          |                                          | ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR102/093/SRR10261593/SRR10261593_1.fastq.gz |
++-----------------+--------+----------+------------------------------------------+----------------------------------------------------------------------------------+
+| curl-2b319c97c2 | curl   | Queued   | workbench.jobs['curl-2b319c97c2'].logs() | curl                                                                             |
+|                 |        |          |                                          | ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR102/093/SRR10261593/SRR10261593_2.fastq.gz |
++-----------------+--------+----------+------------------------------------------+----------------------------------------------------------------------------------+
 ```
 
 ### Distribute package to PIP
