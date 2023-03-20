@@ -10,11 +10,12 @@ dependencies = [
     "httpcore[http2]",
     "httpx==0.23.1",
     "tabulate",
+    "anytree",
 ]
 
 setup(
     name='tiny-cli',
-    version='1.0.8',
+    version='1.0.9',
     description='TinyBio genome analysis tool',
     long_description_content_type='text/markdown',
     url='https://github.com/tinybio-cloud/tiny',

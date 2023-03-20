@@ -3,6 +3,7 @@ from typing import List, Tuple
 
 import httpx
 from tabulate import tabulate
+from anytree import Node, RenderTree
 
 from .storage import upload_files, download_file, list_files_in_bucket, upload_file_path
 from .workflow import execute_workflow, get_job, get_job_logs, JobStatus
@@ -97,7 +98,30 @@ class Workbench:
                                                        auth_token=self.auth.get_access_token()), input_file_path
 
     def list_files(self):
-        return list_files_in_bucket(self.bucket_name, auth_token=self.auth.get_access_token())
+        files = list_files_in_bucket(self.bucket_name, auth_token=self.auth.get_access_token())
+        root = Node(self.bucket_name)
+        for file in files:
+            file_name = file.get('name')
+            file_size = file.get('size')
+
+            path = file_name.split("/")
+            node = root
+            for i in range(len(path)):
+                name = path[i]
+                if name not in [child.name for child in node.children]:
+                    node = Node(name, parent=node)
+                else:
+                    node = [child for child in node.children if child.name == name][0]
+            if file.get('size') is not None:
+                Node(f"{file_name} ({file_size})", parent=node)
+            else:
+                Node(file_name, parent=node)
+
+        output = ""
+        for pre, _, node in RenderTree(root):
+            output += f"{pre}{node.name}\n"
+
+        print(output)
 
     def upload_job(self, files: List[Tuple[str, str]], method: str = 'curl'):
         upload_jobs = upload_file_path(self.bucket_name, files=files, method=method,
