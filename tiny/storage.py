@@ -131,3 +131,19 @@ def upload_file_path(bucket_name: str, files: List[Tuple[str, str]], auth_token:
 
         response.append(r.json())
     return response
+
+
+def create_bucket(bucket_name: str, auth_token: str) -> json:
+    """
+    Creates a bucket
+    :param bucket_name: name of bucket
+    :param auth_token: auth token provided by logging in
+    :return:
+    """
+    url = f"{PROD_BASE_URL}/workbench/{bucket_name}"
+    headers = {'Authorization': f'Bearer {auth_token}'}
+    r = httpx.post(url, headers=headers)
+    if r.status_code != 200:
+        raise Exception(r.content)
+
+    return r.json()

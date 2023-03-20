@@ -5,7 +5,7 @@ import httpx
 from tabulate import tabulate
 from anytree import Node, RenderTree
 
-from .storage import upload_files, download_file, list_files_in_bucket, upload_file_path
+from .storage import upload_files, download_file, list_files_in_bucket, upload_file_path, create_bucket
 from .workflow import execute_workflow, get_job, get_job_logs, JobStatus
 from .settings import PROD_BASE_URL
 
@@ -57,6 +57,9 @@ class Workbench:
             self.auth.authenticate()
         else:
             self.auth = auth
+
+    def __repr__(self):
+        return f'Workbench({self.bucket_name})'
 
     def _add_job(self, job: 'Job'):
         self._jobs[job.job_id] = job
@@ -146,6 +149,23 @@ class Workbench:
 
         # format the table using tabulate
         print_table(headers, table)
+
+
+def create_workbench(bucket_name: str, auth: Auth = None):
+    bucket = create_bucket(bucket_name, auth_token=auth.get_access_token())
+
+    workbench_name = bucket.get('workbench_name')
+    print(f"""
+    You have created a workbench called {workbench_name}.
+
+    To upload a file directly from your machine run workbench.upload('file_path_on_your_machine'). Please note, if you're uploading from a colab notebook, you will need to first upload the file to the colab instance and then upload it from that instance. 
+
+    To upload from a remote machine run workbench.upload_job(method="curl/wget", files=[("public_file_url","download_path")]). 
+
+    The command workbench.run(tool=TOOL_NAME, full_command=COMMAND) will create a super computer (16 cores, 256GB RAM) with the specified tool installed and run the command specified in full_command. 
+    """)
+
+    return Workbench(workbench_name, auth)
 
 
 class Job:
