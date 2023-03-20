@@ -1,1 +1,1 @@
-from .main import Job, Workbench, Auth
+from .main import Job, Workbench, Auth, create_workbench
