@@ -156,13 +156,19 @@ def create_workbench(bucket_name: str, auth: Auth = None):
 
     workbench_name = bucket.get('workbench_name')
     print(f"""
-    You have created a workbench called {workbench_name}.
+        The {workbench_name} workbench is now available. 
 
-    To upload a file directly from your machine run workbench.upload('file_path_on_your_machine'). Please note, if you're uploading from a colab notebook, you will need to first upload the file to the colab instance and then upload it from that instance. 
+        The command workbench.list_files() will return the list of files in your workbench. Note, by default, we've included files for running through an RNA-Seq, ATAC-Seq, and variant calling experiments which are outline here: {urls}.
 
-    To upload from a remote machine run workbench.upload_job(method="curl/wget", files=[("public_file_url","download_path")]). 
+        The command workbench.run(tool=TOOL_NAME, full_command=COMMAND) will create a super computer (16 cores, 256GB RAM) with the specified tool installed and run the command specified in full_command. 
 
-    The command workbench.run(tool=TOOL_NAME, full_command=COMMAND) will create a super computer (16 cores, 256GB RAM) with the specified tool installed and run the command specified in full_command. 
+        To check the status of your commands for a workbench please run. workbench.logs(). 
+
+        To upload a file directly from your machine run workbench.upload('file_path_on_your_machine'). Please note, if you're uploading from a colab notebook, you will need to first upload the file to the colab instance and then upload it from that instance. 
+
+        To upload from a remote machine run workbench.upload_job(method="curl/wget", files=[("public_file_url","download_path")]). 
+
+        To download a file run the following workbench.download('file_path_on_the_workbench'). This will generate a download URL.
     """)
 
     return Workbench(workbench_name, auth)
