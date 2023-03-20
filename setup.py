@@ -10,6 +10,7 @@ dependencies = [
     "httpcore[http2]",
     "httpx==0.23.1",
     "tabulate",
+    "anytree",
 ]
 
 setup(
