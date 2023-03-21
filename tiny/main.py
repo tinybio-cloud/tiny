@@ -82,7 +82,7 @@ class Workbench:
         )
         self._add_job(job)
         get_logs = f"workbench.jobs['{job.job_id}'].logs()"
-        table = [[job.job_id, job.tool, job.status, get_logs, job.full_command]]
+        table = [[job.job_id, job.tool, 'Queued', get_logs, job.full_command]]
         headers = ['Job ID', 'Tool', 'Status', 'Get Logs', 'Full Command']
 
         # format the table using tabulate
