@@ -138,7 +138,10 @@ class Workbench:
         headers = ['Job ID', 'Tool', 'Status', 'Get Logs', 'Full Command']
         print_table(headers, table)
 
-    def jobs(self):
+    def jobs(self, job_id: str = None):
+        if job_id:
+            return self._jobs.get(job_id)
+
         table = []
         for job in self._jobs.values():
             job.status = job.get_status()
@@ -147,6 +150,9 @@ class Workbench:
 
         headers = ['Job ID', 'Tool', 'Status', 'Get Logs', 'Full Command']
 
+        if not table:
+            print('No jobs have been run yet. Run workbench.run(tool, full_command) to run a job.')
+            return
         # format the table using tabulate
         print_table(headers, table)
 
