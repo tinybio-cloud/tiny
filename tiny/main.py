@@ -21,27 +21,24 @@ class Auth:
     def __init__(self, access_token: str = None):
         self.access_token = access_token
 
-        if not self.access_token:
-            self.authenticate()
-
     def __repr__(self):
-        return self.access_token
+        if self.access_token:
+            return self.access_token
 
-    def authenticate(self):
         login_url = f'{PROD_BASE_URL}/auth/google/authorize'
         response = httpx.get(login_url)
 
         if response.status_code == 200:
             auth_url = response.json().get('authorization_url')
-            raise Exception(f'''
+            return (f'''
                 To create a token click here: {auth_url}
 
                 To gain access to your bucket, run:
-                >>> auth = tiny.Auth('YOUR_TOKEN_HERE')
-                >>> workbench = tiny.Workbench('your_bucket_name', auth=auth)
-            ''')
 
-        self.access_token = response.json().get('access_token')
+                workbench = tiny.Workbench(bucket_name="WORKBENCH_NAME", auth_token=YOUR_TOKEN_HERE)
+
+                Check out these comprehensive tutorials on RNA-Seq, ATAC-Seq, and Variant calling on our docs here: http://docs.tinybio.cloud
+            ''')
 
     def get_access_token(self):
         return self.access_token
