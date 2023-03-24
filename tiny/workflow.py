@@ -23,6 +23,7 @@ class JobStatus(enum.Enum):
     SUCCEEDED = 'State.SUCCEEDED'
     FAILED = 'State.FAILED'
     DELETION_IN_PROGRESS = 'State.DELETION_IN_PROGRESS'
+    NOT_STARTED = 'State.NOT_STARTED'
 
     STATUS_CHOICES = (
         (STATE_UNSPECIFIED, 'State unspecified'),
@@ -32,6 +33,7 @@ class JobStatus(enum.Enum):
         (SUCCEEDED, 'Completed'),
         (FAILED, 'Failed'),
         (DELETION_IN_PROGRESS, 'Deletion in progress'),
+        (NOT_STARTED, 'Not started')
     )
 
     def __str__(self):
@@ -43,6 +45,7 @@ class JobStatus(enum.Enum):
             'State.SUCCEEDED': 'Completed',
             'State.FAILED': 'Failed',
             'State.DELETION_IN_PROGRESS': 'Deletion in progress',
+            'State.NOT_STARTED': 'Not started'
         }
         return rep_map.get(self.value)
 
@@ -52,7 +55,7 @@ def get_job(job_id: str, auth_token: str) -> json:
     headers = {'Authorization': f'Bearer {auth_token}'}
     r = httpx.get(url=url, headers=headers)
     if r.status_code != 200:
-        raise Exception(f'Failed to get job: {r.text}')
+        return JobStatus.NOT_STARTED
     state = r.json().get('state')
     return JobStatus(state)
 
