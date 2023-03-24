@@ -129,7 +129,7 @@ class Workbench:
         table = []
         for job in upload_jobs:
             job = Job(job_id=job.get('id'), tool=method, full_command=f'{method} {job.get("input")}', workbench=self)
-            row = [job.job_id, job.tool, job.status, f"workbench.jobs['{job.job_id}'].logs()", job.full_command]
+            row = [job.job_id, job.tool, job.status, f"workbench.jobs('{job.job_id}').logs()", job.full_command]
             self._add_job(job)
             table.append(row)
         headers = ['Job ID', 'Tool', 'Status', 'Get Logs', 'Full Command']
@@ -142,7 +142,7 @@ class Workbench:
         table = []
         for job in self._jobs.values():
             job.status = job.get_status()
-            row = [job.job_id, job.tool, job.status, f"workbench.jobs['{job.job_id}'].logs()", job.full_command]
+            row = [job.job_id, job.tool, job.status, f"workbench.jobs('{job.job_id}').logs()", job.full_command]
             table.append(row)
 
         headers = ['Job ID', 'Tool', 'Status', 'Get Logs', 'Full Command']
