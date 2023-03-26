@@ -147,3 +147,27 @@ def create_bucket(bucket_name: str, auth_token: str) -> json:
         raise Exception(r.content)
 
     return r.json()
+
+
+def move_file(bucket_name: str, source_file: str, destination_file: str, auth_token: str) -> json:
+    """
+    Moves a file in a bucket
+    :param bucket_name: name of bucket
+    :param source_file: full path of source file
+    :param destination_file: full path of destination file
+    :param auth_token: auth token provided by logging in
+    :return:
+    Cannot rename folders curretly only files
+    """
+
+    url = f"{PROD_BASE_URL}/workbench/{bucket_name}/move-file"
+    headers = {'Authorization': f'Bearer {auth_token}'}
+    data = {
+        'source_file_name': source_file,
+        'destination_file_name': destination_file
+    }
+    r = httpx.post(url, headers=headers, json=data)
+    if r.status_code != 200:
+        return {'message': json.loads(r.content).get('detail')}
+
+    return r.json()

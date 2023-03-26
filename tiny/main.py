@@ -5,16 +5,16 @@ import httpx
 from tabulate import tabulate
 from anytree import Node, RenderTree
 
-from .storage import upload_files, download_file, list_files_in_bucket, upload_file_path, create_bucket
+from .storage import upload_files, download_file, list_files_in_bucket, upload_file_path, create_bucket, move_file
 from .workflow import execute_workflow, get_job, get_job_logs, JobStatus
 from .settings import PROD_BASE_URL
 
 
-def print_table(headers, table_data):
+def print_table(headers, table_data, maxcolwidths=[None, None, 60, 60, 80]):
     """
     Print table using specified headers, table data, format, and column width.
     """
-    print(tabulate(table_data, headers=headers, tablefmt="grid", maxcolwidths=[None, None, 60, 60, 80]))
+    print(tabulate(table_data, headers=headers, tablefmt="grid", maxcolwidths=maxcolwidths))
 
 
 class Auth:
@@ -129,7 +129,7 @@ class Workbench:
         table = []
         for job in upload_jobs:
             job = Job(job_id=job.get('id'), tool=method, full_command=f'{method} {job.get("input")}', workbench=self)
-            row = [job.job_id, job.tool, job.status, f"workbench.jobs['{job.job_id}'].logs()", job.full_command]
+            row = [job.job_id, job.tool, job.status, f"workbench.jobs('{job.job_id}').logs()", job.full_command]
             self._add_job(job)
             table.append(row)
         headers = ['Job ID', 'Tool', 'Status', 'Get Logs', 'Full Command']
@@ -142,7 +142,7 @@ class Workbench:
         table = []
         for job in self._jobs.values():
             job.status = job.get_status()
-            row = [job.job_id, job.tool, job.status, f"workbench.jobs['{job.job_id}'].logs()", job.full_command]
+            row = [job.job_id, job.tool, job.status, f"workbench.jobs('{job.job_id}').logs()", job.full_command]
             table.append(row)
 
         headers = ['Job ID', 'Tool', 'Status', 'Get Logs', 'Full Command']
@@ -151,6 +151,12 @@ class Workbench:
             print('No jobs have been run yet. Run workbench.run(tool, full_command) to run a job.')
             return
         # format the table using tabulate
+        print_table(headers, table)
+
+    def move_file(self, source, destination):
+        response = move_file(self.bucket_name, source, destination, auth_token=self.auth.get_access_token())
+        headers = ['Source', 'Destination', 'Message']
+        table = [[source, destination, response.get('message')]]
         print_table(headers, table)
 
 

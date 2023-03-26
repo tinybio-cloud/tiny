@@ -96,6 +96,9 @@ files = [
 | curl-2b319c97c2 | curl   | Queued   | workbench.jobs['curl-2b319c97c2'].logs() | curl                                                                             |
 |                 |        |          |                                          | ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR102/093/SRR10261593/SRR10261593_2.fastq.gz |
 +-----------------+--------+----------+------------------------------------------+----------------------------------------------------------------------------------+
+
+# move files on your workbench
+>>> workbench.move_file('input/sample_data/SRR10261593_1.fastq.gz', 'input/SRR10261593_1-renamed.fastq.gz')
 ```
 
 ### Distribute package to PIP
