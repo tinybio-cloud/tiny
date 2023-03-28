@@ -74,13 +74,14 @@ class Workbench:
         job = Job(
             job_id=execution.get('id'),
             tool=execution.get('tool'),
+            version=execution.get('version'),
             full_command=execution.get('full_command'),
             workbench=self
         )
         self._add_job(job)
         get_logs = f"workbench.jobs['{job.job_id}'].logs()"
-        table = [[job.job_id, job.tool, 'Queued', get_logs, job.full_command]]
-        headers = ['Job ID', 'Tool', 'Status', 'Get Logs', 'Full Command']
+        table = [[job.job_id, job.tool, job.version, 'Queued', get_logs, job.full_command]]
+        headers = ['Job ID', 'Tool', 'Version', 'Status', 'Get Logs', 'Full Command']
 
         # format the table using tabulate
         print_table(headers, table)
@@ -129,10 +130,10 @@ class Workbench:
         table = []
         for job in upload_jobs:
             job = Job(job_id=job.get('id'), tool=method, full_command=f'{method} {job.get("input")}', workbench=self)
-            row = [job.job_id, job.tool, job.status, f"workbench.jobs('{job.job_id}').logs()", job.full_command]
+            row = [job.job_id, job.tool, job.version, job.status, f"workbench.jobs('{job.job_id}').logs()", job.full_command]
             self._add_job(job)
             table.append(row)
-        headers = ['Job ID', 'Tool', 'Status', 'Get Logs', 'Full Command']
+        headers = ['Job ID', 'Tool', 'Version', 'Status', 'Get Logs', 'Full Command']
         print_table(headers, table)
 
     def jobs(self, job_id: str = None):
@@ -142,10 +143,10 @@ class Workbench:
         table = []
         for job in self._jobs.values():
             job.status = job.get_status()
-            row = [job.job_id, job.tool, job.status, f"workbench.jobs('{job.job_id}').logs()", job.full_command]
+            row = [job.job_id, job.tool, job.version, job.status, f"workbench.jobs('{job.job_id}').logs()", job.full_command]
             table.append(row)
 
-        headers = ['Job ID', 'Tool', 'Status', 'Get Logs', 'Full Command']
+        headers = ['Job ID', 'Tool', 'Version', 'Status', 'Get Logs', 'Full Command']
 
         if not table:
             print('No jobs have been run yet. Run workbench.run(tool, full_command) to run a job.')
@@ -188,12 +189,14 @@ class Job:
             self,
             job_id: str,
             tool: str,
+            version: str,
             full_command: str,
             workbench: Workbench,
             status: str = JobStatus.QUEUED,
     ):
         self.job_id = job_id
         self.tool = tool
+        self.version = version
         self.full_command = full_command
         self.workbench = workbench
         self.status = status
