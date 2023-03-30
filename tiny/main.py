@@ -129,7 +129,7 @@ class Workbench:
                                        auth_token=self.auth.get_access_token())
         table = []
         for job in upload_jobs:
-            job = Job(job_id=job.get('id'), tool=method, full_command=f'{method} {job.get("input")}', workbench=self)
+            job = Job(job_id=job.get('id'), tool=method, version='latest', full_command=f'{method} {job.get("input")}', workbench=self)
             row = [job.job_id, job.tool, job.version, job.status, f"workbench.jobs('{job.job_id}').logs()", job.full_command]
             self._add_job(job)
             table.append(row)
@@ -168,7 +168,9 @@ def create_workbench(bucket_name: str, auth: Auth = None):
     print(f"""
         The {workbench_name} workbench is now available. 
 
-        The command workbench.list_files() will return the list of files in your workbench. Note, by default, we've included files for running through an RNA-Seq, ATAC-Seq, and variant calling experiments which are outline here: {urls}.
+        The command workbench.list_files() will return the list of files in your workbench. Note, by default, we've included files for running through an RNA-Seq, ATAC-Seq, and variant calling experiments which are outline here:
+        
+        https://docs.tinybio.cloud/docs
 
         The command workbench.run(tool=TOOL_NAME, full_command=COMMAND) will create a super computer (16 cores, 256GB RAM) with the specified tool installed and run the command specified in full_command. 
 
