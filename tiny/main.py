@@ -79,7 +79,7 @@ class Workbench:
             workbench=self
         )
         self._add_job(job)
-        get_logs = f"workbench.jobs['{job.job_id}'].logs()"
+        get_logs = f"workbench.jobs('{job.job_id}').logs()"
         table = [[job.job_id, job.tool, job.version, 'Queued', get_logs, job.full_command]]
         headers = ['Job ID', 'Tool', 'Version', 'Status', 'Get Logs', 'Full Command']
 
