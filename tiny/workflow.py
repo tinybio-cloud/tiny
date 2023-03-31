@@ -16,14 +16,14 @@ def execute_workflow(bucket_name: str, arguments: dict, auth_token: str) -> json
 
 
 class JobStatus(enum.Enum):
-    STATE_UNSPECIFIED = 'State.STATE_UNSPECIFIED'
-    QUEUED = 'State.QUEUED'
-    SCHEDULED = 'State.SCHEDULED'
-    RUNNING = 'State.RUNNING'
-    SUCCEEDED = 'State.SUCCEEDED'
-    FAILED = 'State.FAILED'
-    DELETION_IN_PROGRESS = 'State.DELETION_IN_PROGRESS'
-    NOT_STARTED = 'State.NOT_STARTED'
+    STATE_UNSPECIFIED = 'STATE_UNSPECIFIED'
+    QUEUED = 'QUEUED'
+    SCHEDULED = 'SCHEDULED'
+    RUNNING = 'RUNNING'
+    SUCCEEDED = 'SUCCEEDED'
+    FAILED = 'FAILED'
+    DELETION_IN_PROGRESS = 'DELETION_IN_PROGRESS'
+    NOT_STARTED = 'NOT_STARTED'
 
     STATUS_CHOICES = (
         (STATE_UNSPECIFIED, 'State unspecified'),
@@ -38,14 +38,14 @@ class JobStatus(enum.Enum):
 
     def __str__(self):
         rep_map = {
-            'State.STATE_UNSPECIFIED': 'State unspecified',
-            'State.QUEUED': 'Queued',
-            'State.SCHEDULED': 'Scheduled',
-            'State.RUNNING': 'Running',
-            'State.SUCCEEDED': 'Completed',
-            'State.FAILED': 'Failed',
-            'State.DELETION_IN_PROGRESS': 'Deletion in progress',
-            'State.NOT_STARTED': 'Not started'
+            'STATE_UNSPECIFIED': 'State unspecified',
+            'QUEUED': 'Queued',
+            'SCHEDULED': 'Scheduled',
+            'RUNNING': 'Running',
+            'SUCCEEDED': 'Completed',
+            'FAILED': 'Failed',
+            'DELETION_IN_PROGRESS': 'Deletion in progress',
+            'NOT_STARTED': 'Not started'
         }
         return rep_map.get(self.value)
 
