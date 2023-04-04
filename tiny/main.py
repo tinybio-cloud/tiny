@@ -161,7 +161,7 @@ class Workbench:
         print_table(headers, table)
 
 
-def create_workbench(bucket_name: str, auth: Auth = None):
+def create_workbench(bucket_name: str, auth: Auth):
     bucket = create_bucket(bucket_name, auth_token=auth.get_access_token())
 
     workbench_name = bucket.get('workbench_name')
