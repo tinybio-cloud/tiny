@@ -41,7 +41,7 @@ def list_files_in_bucket(bucket_name: str, auth_token: str) -> json:
     headers = {'Authorization': f'Bearer {auth_token}'}
     r = httpx.get(url, timeout=None, headers=headers)
     if r.status_code != 200:
-        raise Exception(r.json())
+        raise Exception(r.content)
         # raise Exception(f"Error listing files in bucket {bucket_name}")
 
     return r.json()
@@ -125,7 +125,7 @@ def upload_file_path(bucket_name: str, files: List[Tuple[str, str]], auth_token:
             'output_path': output_path,
             'method': method
         }
-        r = httpx.post(url, headers=headers, json=data)
+        r = httpx.post(url, timeout=None, headers=headers, json=data)
         if r.status_code != 200:
             raise Exception(r.content)
 
@@ -142,7 +142,7 @@ def create_bucket(bucket_name: str, auth_token: str) -> json:
     """
     url = f"{PROD_BASE_URL}/workbench/{bucket_name}"
     headers = {'Authorization': f'Bearer {auth_token}'}
-    r = httpx.post(url, headers=headers)
+    r = httpx.post(url, timeout=None, headers=headers)
     if r.status_code != 200:
         raise Exception(r.content)
 
@@ -166,7 +166,7 @@ def move_file(bucket_name: str, source_file: str, destination_file: str, auth_to
         'source_file_name': source_file,
         'destination_file_name': destination_file
     }
-    r = httpx.post(url, headers=headers, json=data)
+    r = httpx.post(url, timeout=None, headers=headers, json=data)
     if r.status_code != 200:
         return {'message': json.loads(r.content).get('detail')}
 

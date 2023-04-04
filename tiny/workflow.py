@@ -53,7 +53,7 @@ class JobStatus(enum.Enum):
 def get_job(job_id: str, auth_token: str) -> json:
     url = f'{PROD_BASE_URL}/jobs/{job_id}'
     headers = {'Authorization': f'Bearer {auth_token}'}
-    r = httpx.get(url=url, headers=headers)
+    r = httpx.get(url=url, timeout=None, headers=headers)
     if r.status_code != 200:
         return JobStatus.NOT_STARTED
     state = r.json().get('state')
