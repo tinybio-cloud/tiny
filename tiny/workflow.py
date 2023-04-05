@@ -30,7 +30,7 @@ class JobStatus(enum.Enum):
         (QUEUED, 'Queued'),
         (SCHEDULED, 'Scheduled'),
         (RUNNING, 'Running'),
-        (SUCCEEDED, 'Completed'),
+        (SUCCEEDED, 'Succeeded'),
         (FAILED, 'Failed'),
         (DELETION_IN_PROGRESS, 'Deletion in progress'),
         (NOT_STARTED, 'Not started')

@@ -203,13 +203,13 @@ class Job:
         self.workbench = workbench
         self.status = status
 
-    def __repr__(self):
+    def __str__(self):
         headers = ['Job ID', 'Tool', 'Version', 'Status', 'Get Logs', 'Full Command']
         data = [[self.job_id, self.tool, self.version, self.get_status(), f"workbench.jobs('{self.job_id}').logs()", self.full_command]]
         print_table(headers, data)
 
     def get_status(self):
-        if self.status in [JobStatus.SUCCEEDED, JobStatus.FAILED, JobStatus.DELETION_IN_PROGRESS]:
+        if getattr(JobStatus, self.status) in [JobStatus.SUCCEEDED, JobStatus.FAILED, JobStatus.DELETION_IN_PROGRESS]:
             return self.status.__str__()
         status = get_job(self.job_id, auth_token=self.workbench.auth.get_access_token())
         self.status = status
