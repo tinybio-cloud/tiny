@@ -21,7 +21,7 @@ def download_file(bucket_name: str, remote_file: str, auth_token: str) -> json:
     query_params = {'file_path': remote_file}
     url = f"{PROD_BASE_URL}/workbench/{bucket_name}/download"
     headers = {'Authorization': f'Bearer {auth_token}'}
-    r = httpx.get(url, params=query_params, headers=headers)
+    r = httpx.get(url, timeout=None, params=query_params, headers=headers)
     if r.status_code != 200:
         raise Exception(f"Error downloading file {remote_file} from bucket {bucket_name}")
 

@@ -26,7 +26,7 @@ class Auth:
             return self.access_token
 
         login_url = f'{PROD_BASE_URL}/auth/google/authorize'
-        response = httpx.get(login_url)
+        response = httpx.get(login_url, timeout=None)
 
         if response.status_code == 200:
             auth_url = response.json().get('authorization_url')
@@ -203,9 +203,14 @@ class Job:
         self.workbench = workbench
         self.status = status
 
+    def __repr__(self):
+        headers = ['Job ID', 'Tool', 'Version', 'Status', 'Get Logs', 'Full Command']
+        data = [[self.job_id, self.tool, self.version, self.get_status(), f"workbench.jobs('{self.job_id}').logs()", self.full_command]]
+        print_table(headers, data)
+
     def get_status(self):
         if self.status in [JobStatus.SUCCEEDED, JobStatus.FAILED, JobStatus.DELETION_IN_PROGRESS]:
-            return self.status
+            return self.status.__str__()
         status = get_job(self.job_id, auth_token=self.workbench.auth.get_access_token())
         self.status = status
         return status.__str__()
