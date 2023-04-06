@@ -87,11 +87,17 @@ class Workbench:
         print_table(headers, table)
 
     def upload_file(self, file) -> dict:
-        uploaded_files = upload_files(self.bucket_name, file, auth_token=self.auth.get_access_token())
-        return uploaded_files
+        try:
+            uploaded_files = upload_files(self.bucket_name, file, auth_token=self.auth.get_access_token())
+            return uploaded_files
+        except Exception as e:
+            print(e)
 
     def download(self, file) -> dict:
-        return download_file(self.bucket_name, file, auth_token=self.auth.get_access_token())
+        try:
+            return download_file(self.bucket_name, file, auth_token=self.auth.get_access_token())
+        except Exception as e:
+            print(e)
 
     def file_exists_in_bucket(self, file):
         input_file_path = f'input/{file}'
@@ -216,4 +222,7 @@ class Job:
         return status.__str__()
 
     def logs(self):
-        return get_job_logs(self.job_id, auth_token=self.workbench.auth.get_access_token())
+        try:
+            return get_job_logs(self.job_id, auth_token=self.workbench.auth.get_access_token())
+        except Exception as e:
+            print(e)
