@@ -70,7 +70,11 @@ class Workbench:
             'full_command': full_command,
             'tool': tool,
         }
-        execution = execute_workflow(self.bucket_name, arguments, auth_token=self.auth.get_access_token())
+        status = JobStatus.QUEUED.__str__()
+        try:
+            execution = execute_workflow(self.bucket_name, arguments, auth_token=self.auth.get_access_token())
+        except Exception as e:
+            status = e
         job = Job(
             job_id=execution.get('id'),
             tool=execution.get('tool'),
@@ -80,7 +84,7 @@ class Workbench:
         )
         self._add_job(job)
         get_logs = f"workbench.jobs('{job.job_id}').logs()"
-        table = [[job.job_id, job.tool, job.version, JobStatus.QUEUED.__str__(), get_logs, job.full_command]]
+        table = [[job.job_id, job.tool, job.version, status, get_logs, job.full_command]]
         headers = ['Job ID', 'Tool', 'Version', 'Status', 'Get Logs', 'Full Command']
 
         # format the table using tabulate
