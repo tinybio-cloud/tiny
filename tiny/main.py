@@ -73,22 +73,22 @@ class Workbench:
         status = JobStatus.QUEUED.__str__()
         try:
             execution = execute_workflow(self.bucket_name, arguments, auth_token=self.auth.get_access_token())
+            job = Job(
+                job_id=execution.get('id'),
+                tool=execution.get('tool'),
+                version=execution.get('version'),
+                full_command=execution.get('full_command'),
+                workbench=self
+            )
+            self._add_job(job)
+            get_logs = f"workbench.jobs('{job.job_id}').logs()"
+            table = [[job.job_id, job.tool, job.version, status, get_logs, job.full_command]]
+            headers = ['Job ID', 'Tool', 'Version', 'Status', 'Get Logs', 'Full Command']
+
+            # format the table using tabulate
+            print_table(headers, table)
         except Exception as e:
             status = e
-        job = Job(
-            job_id=execution.get('id'),
-            tool=execution.get('tool'),
-            version=execution.get('version'),
-            full_command=execution.get('full_command'),
-            workbench=self
-        )
-        self._add_job(job)
-        get_logs = f"workbench.jobs('{job.job_id}').logs()"
-        table = [[job.job_id, job.tool, job.version, status, get_logs, job.full_command]]
-        headers = ['Job ID', 'Tool', 'Version', 'Status', 'Get Logs', 'Full Command']
-
-        # format the table using tabulate
-        print_table(headers, table)
 
     def upload_file(self, file) -> dict:
         try:
