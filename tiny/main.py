@@ -215,7 +215,7 @@ class Job:
         print_table(headers, data)
 
     def get_status(self):
-        if getattr(JobStatus, self.status.__str__()) in [JobStatus.SUCCEEDED, JobStatus.FAILED, JobStatus.DELETION_IN_PROGRESS]:
+        if getattr(JobStatus, self.status) in [JobStatus.SUCCEEDED, JobStatus.FAILED, JobStatus.DELETION_IN_PROGRESS]:
             return self.status.__str__()
         status = get_job(self.job_id, auth_token=self.workbench.auth.get_access_token())
         self.status = status
