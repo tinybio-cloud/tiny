@@ -6,7 +6,7 @@ from tabulate import tabulate
 from anytree import Node, RenderTree
 
 from .storage import upload_files, download_file, list_files_in_bucket, upload_file_path, create_bucket, move_file
-from .workflow import execute_workflow, get_job, get_job_logs, JobStatus
+from .workflow import execute_workflow, get_job, get_job_logs, JobStatus, stream_job_logs
 from .settings import PROD_BASE_URL
 
 
@@ -182,6 +182,7 @@ class Workbench:
         print_table(headers, table)
 
 
+
 def create_workbench(bucket_name: str, auth: Auth):
     bucket = create_bucket(bucket_name, auth_token=auth.get_access_token())
 
@@ -239,5 +240,11 @@ class Job:
     def logs(self):
         try:
             return get_job_logs(self.job_id, auth_token=self.workbench.auth.get_access_token())
+        except Exception as e:
+            print(e)
+
+    def stream_logs(self):
+        try:
+            stream_job_logs(self.job_id, auth_token=self.workbench.auth.get_access_token())
         except Exception as e:
             print(e)
