@@ -182,12 +182,6 @@ class Workbench:
         print_table(headers, table)
 
 
-    def stream_logs(self, job_id):
-        try:
-            stream_job_logs(job_id, auth_token=self.auth.get_access_token())
-        except Exception as e:
-            print(e)
-
 
 def create_workbench(bucket_name: str, auth: Auth):
     bucket = create_bucket(bucket_name, auth_token=auth.get_access_token())
