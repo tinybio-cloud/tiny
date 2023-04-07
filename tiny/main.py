@@ -82,13 +82,22 @@ class Workbench:
             )
             self._add_job(job)
             get_logs = f"workbench.jobs('{job.job_id}').logs()"
-            table = [[job.job_id, job.tool, job.version, status, get_logs, job.full_command]]
-            headers = ['Job ID', 'Tool', 'Version', 'Status', 'Get Logs', 'Full Command']
-
-            # format the table using tabulate
-            print_table(headers, table)
         except Exception as e:
-            status = e
+            status = e.__str__()
+            get_logs = 'N/A'
+            job = Job(
+                job_id='N/A',
+                tool=tool,
+                version='N/A',
+                full_command=full_command,
+                workbench=self
+            )
+
+        table = [[job.job_id, job.tool, job.version, status, get_logs, job.full_command]]
+        headers = ['Job ID', 'Tool', 'Version', 'Status', 'Get Logs', 'Full Command']
+
+        # format the table using tabulate
+        print_table(headers, table)
 
     def upload_file(self, file) -> dict:
         try:
@@ -146,13 +155,15 @@ class Workbench:
         headers = ['Job ID', 'Tool', 'Version', 'Status', 'Get Logs', 'Full Command']
         print_table(headers, table)
 
-    def jobs(self, job_id: str = None):
+    def jobs(self, job_id: str = None, exclude: List[str] = None):
         if job_id:
             return self._jobs.get(job_id)
 
         table = []
         for job in self._jobs.values():
             job.status = job.get_status()
+            if exclude and job.status.__str__() in exclude:
+                continue
             row = [job.job_id, job.tool, job.version, job.status.__str__(), f"workbench.jobs('{job.job_id}').logs()", job.full_command]
             table.append(row)
 
