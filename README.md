@@ -99,6 +99,12 @@ files = [
 
 # move files on your workbench
 >>> workbench.move_file('input/sample_data/SRR10261593_1.fastq.gz', 'input/SRR10261593_1-renamed.fastq.gz')
+
+# you can exclude certain statuses from the list of jobs
+>>> workbench.jobs(exclude=['Succeeded'])
+
+# Stream logs of a job
+>>> workbench.jobs('samtools123').stream_logs()
 ```
 
 ### Distribute package to PIP

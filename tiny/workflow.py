@@ -67,3 +67,15 @@ def get_job_logs(job_id: str, auth_token: str) -> json:
     if r.status_code != 200:
         raise Exception(f'Failed to get job logs: {r.text}')
     return r.json()
+
+def stream_job_logs(job_id: str, auth_token: str) -> json:
+    url = f'{PROD_BASE_URL}/jobs/{job_id}/logs/stream'
+    headers = {
+        'Authorization': f'Bearer {auth_token}',
+    }
+    with httpx.stream('GET', url) as r:
+        try:
+            for chunk in r.iter_raw():  # or, for line in r.iter_lines():
+                print(chunk.decode('utf-8').strip())
+        except Exception as e:
+            print(f"Stream Ended: no more logs to stream.")
