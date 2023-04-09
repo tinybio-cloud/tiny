@@ -28,14 +28,17 @@ def download_file(bucket_name: str, remote_file: str, auth_token: str) -> json:
     return r.json()
 
 
-def list_files_in_bucket(bucket_name: str, auth_token: str) -> json:
+def list_files_in_bucket(bucket_name: str, auth_token: str, path: str = None) -> json:
     """
     Lists files in a bucket
     :param bucket_name: name of bucket
+    :param path: path to list files in
     :param auth_token: auth token provided by logging in
     :return:
     """
     url = f"{PROD_BASE_URL}/workbench/{bucket_name}"
+    if path:
+        url += f"?path={path}"
 
     #TODO: abstract this out into a client?
     headers = {'Authorization': f'Bearer {auth_token}'}

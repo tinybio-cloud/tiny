@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 from typing import List, Tuple
 
@@ -21,39 +22,30 @@ class Auth:
     def __init__(self, access_token: str = None):
         self.access_token = access_token
 
-    def __repr__(self):
-        if self.access_token:
-            return self.access_token
-
-        login_url = f'{PROD_BASE_URL}/auth/google/authorize'
-        response = httpx.get(login_url, timeout=None)
-
-        if response.status_code == 200:
-            auth_url = response.json().get('authorization_url')
-            return (f'''
-                To create a token click here: {auth_url}
-
-                To gain access to your bucket, run:
-
-                workbench = tiny.Workbench(bucket_name="WORKBENCH_NAME", auth_token=YOUR_TOKEN_HERE)
-
-                Check out these comprehensive tutorials on RNA-Seq, ATAC-Seq, and Variant calling on our docs here: http://docs.tinybio.cloud
-            ''')
-
     def get_access_token(self):
         return self.access_token
 
 
 class Workbench:
-    def __init__(self, bucket_name: str, auth: Auth = None):
+    def __init__(self, bucket_name: str):
         self.bucket_name = bucket_name
         self._jobs = {}
-
-        if not auth:
-            self.auth = Auth()
-            self.auth.authenticate()
+        auth_token = os.environ.get('TINY_AUTH_TOKEN')
+        if auth_token:
+            self.auth = Auth(auth_token)
         else:
-            self.auth = auth
+            print("""
+                To create a token click here: https://api.tinybio.cloud/readme-docs/login
+                
+                SET YOUR TOKEN AS AN ENVIRONMENT VARIABLE:
+                import os
+                os.environ['TINY_AUTH_TOKEN']='YOUR_TOKEN_HERE'
+                
+                To gain access to your bucket, run:
+                workbench = tiny.Workbench(bucket_name="WORKBENCH_NAME")
+
+                Check out these comprehensive tutorials on RNA-Seq, ATAC-Seq, and Variant calling on our docs here: http://docs.tinybio.cloud
+            """)
 
     def __repr__(self):
         return f'Workbench({self.bucket_name})'
@@ -117,8 +109,16 @@ class Workbench:
         return input_file_path in list_files_in_bucket(self.bucket_name,
                                                        auth_token=self.auth.get_access_token()), input_file_path
 
-    def list_files(self):
-        files = list_files_in_bucket(self.bucket_name, auth_token=self.auth.get_access_token())
+    def ls(self, path: str = None):
+        return self.list_files(path)
+
+    # TODO: rename path to directory?
+    def list_files(self, path: str = None):
+        files = list_files_in_bucket(
+            self.bucket_name,
+            auth_token=self.auth.get_access_token(),
+            path=path
+        )
         root = Node(self.bucket_name)
         for file in files:
             file_name = file.get('name')
@@ -132,10 +132,8 @@ class Workbench:
                     node = Node(name, parent=node)
                 else:
                     node = [child for child in node.children if child.name == name][0]
-            if file.get('size') is not None:
+            if file_size is not None:
                 Node(f"{file_name} ({file_size})", parent=node)
-            else:
-                Node(file_name, parent=node)
 
         output = ""
         for pre, _, node in RenderTree(root):
