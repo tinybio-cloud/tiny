@@ -21,11 +21,35 @@ get your auth token from https://tiny.bio/login
 
 >>> import tiny
 
-# Add your auth token
->>> auth = tiny.Auth('YOUR_AUTH_TOKEN')
+# Add your auth token to the environment
+>>> export TINYBIO_AUTH_TOKEN=your_auth_token
+or
+>>> import os
+>>> os.environ['TINYBIO_AUTH_TOKEN']='YOUR_TOKEN_HERE'
+
+# Create a workbench or use your existing workbench
+>>> workbench = tiny.create_workbench('workbench_name')
+The testing-delete-me-20230410160630063331 workbench is now available. 
+
+The command workbench.ls() will return the list of files in your workbench. Note, by default, we've included files for running through an RNA-Seq, ATAC-Seq, and variant calling experiments which are outline here:
+
+https://docs.tinybio.cloud/docs
+
+The command workbench.run(tool=TOOL_NAME, full_command=COMMAND) will create an instance that has 10 cores w/ 32GB RAM. The specified tool preinstalled and will run the command specified in full_command. 
+
+To check the status of your commands for a workbench please run. workbench('JOBID').logs(). 
+
+To upload a file directly from your machine run workbench.upload('file_path_on_your_machine'). Please note, if you're uploading from a colab notebook, you will need to first upload the file to the colab instance and then upload it from that instance. 
+
+To upload from a remote machine run workbench.upload_job(method="curl or wget", files=[("public_file_url","destination_path_on_workbench")]). 
+
+To download a file run the following workbench.download('file_path_on_the_workbench'). This will generate a download URL.
+    
+Workbench(testing-delete-me-20230410160630063331)
+
 
 # initialize your workbench
->>> workbench = tiny.Workbench('rna-seq-test', auth=auth)
+>>> workbench = tiny.Workbench('rna-seq-test')
 
 # Upload files to your workbench
 >>> workbench.upload('/path/to/file/samplesheet_core.csv')
@@ -67,7 +91,17 @@ or
 
 # list files on your workbench
 >>> workbench.list_files()
-['input/', 'input/wgEncodeRikenCageGm12878CellPapAlnRep1.bam', 'output/', 'output/cli-test-out.sam', 'working/']
+reproduce-covid-paper-20230404201606359927
+└── output
+    └── mapping
+        ├── 
+        │   └── output/mapping/ (0 Bytes)
+        ├── CRR119890_Aligned.out.bam
+        │   └── output/mapping/CRR119890_Aligned.out.bam (17.6 GB)
+        ├── CRR119890_Aligned.toTranscriptome.out.bam
+        │   └── output/mapping/CRR119890_Aligned.toTranscriptome.out.bam (14.4 GB)
+        ├── CRR119890_Log.final.out
+        │   └── output/mapping/CRR119890_Log.final.out (2.0 kB)
 
 # Download the output file
 >>> workbench.download('cli-test-out.sam')
@@ -105,6 +139,21 @@ files = [
 
 # Stream logs of a job
 >>> workbench.jobs('samtools123').stream_logs()
+
+# List files in a directory on your workbench
+>>> workbench.ls('output/')
+reproduce-covid-paper-20230404201606359927
+└── output
+    └── mapping
+        ├── 
+        │   └── output/mapping/ (0 Bytes)
+        ├── CRR119890_Aligned.out.bam
+        │   └── output/mapping/CRR119890_Aligned.out.bam (17.6 GB)
+        ├── CRR119890_Aligned.toTranscriptome.out.bam
+        │   └── output/mapping/CRR119890_Aligned.toTranscriptome.out.bam (14.4 GB)
+        ├── CRR119890_Log.final.out
+        │   └── output/mapping/CRR119890_Log.final.out (2.0 kB)
+
 ```
 
 ### Distribute package to PIP

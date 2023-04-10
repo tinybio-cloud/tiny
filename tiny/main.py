@@ -1,3 +1,5 @@
+import json
+import os
 from datetime import datetime
 from typing import List, Tuple
 
@@ -21,39 +23,32 @@ class Auth:
     def __init__(self, access_token: str = None):
         self.access_token = access_token
 
-    def __repr__(self):
-        if self.access_token:
-            return self.access_token
-
-        login_url = f'{PROD_BASE_URL}/auth/google/authorize'
-        response = httpx.get(login_url, timeout=None)
-
-        if response.status_code == 200:
-            auth_url = response.json().get('authorization_url')
-            return (f'''
-                To create a token click here: {auth_url}
-
-                To gain access to your bucket, run:
-
-                workbench = tiny.Workbench(bucket_name="WORKBENCH_NAME", auth_token=YOUR_TOKEN_HERE)
-
-                Check out these comprehensive tutorials on RNA-Seq, ATAC-Seq, and Variant calling on our docs here: http://docs.tinybio.cloud
-            ''')
-
     def get_access_token(self):
         return self.access_token
 
 
 class Workbench:
-    def __init__(self, bucket_name: str, auth: Auth = None):
+    def __init__(self, bucket_name: str):
         self.bucket_name = bucket_name
         self._jobs = {}
-
-        if not auth:
-            self.auth = Auth()
-            self.auth.authenticate()
+        auth_token = os.environ.get('TINYBIO_AUTH_TOKEN')
+        if auth_token:
+            self.auth = Auth(auth_token)
         else:
-            self.auth = auth
+            print("""
+TINYBIO_AUTH_TOKEN NOT FOUND IN ENVIRONMENT VARIABLES
+
+To create a token click here: https://api.tinybio.cloud/readme-docs/login
+
+SET YOUR TOKEN AS AN ENVIRONMENT VARIABLE:
+import os
+os.environ['TINYBIO_AUTH_TOKEN']='YOUR_TOKEN_HERE'
+
+To gain access to your bucket, run:
+workbench = tiny.Workbench(bucket_name="WORKBENCH_NAME")
+
+Check out these comprehensive tutorials on RNA-Seq, ATAC-Seq, and Variant calling on our docs here: http://docs.tinybio.cloud
+            """)
 
     def __repr__(self):
         return f'Workbench({self.bucket_name})'
@@ -117,8 +112,15 @@ class Workbench:
         return input_file_path in list_files_in_bucket(self.bucket_name,
                                                        auth_token=self.auth.get_access_token()), input_file_path
 
-    def list_files(self):
-        files = list_files_in_bucket(self.bucket_name, auth_token=self.auth.get_access_token())
+    def ls(self, path: str = None):
+        return self.list_files(path)
+
+    def list_files(self, path: str = None):
+        files = list_files_in_bucket(
+            self.bucket_name,
+            auth_token=self.auth.get_access_token(),
+            path=path
+        )
         root = Node(self.bucket_name)
         for file in files:
             file_name = file.get('name')
@@ -132,10 +134,8 @@ class Workbench:
                     node = Node(name, parent=node)
                 else:
                     node = [child for child in node.children if child.name == name][0]
-            if file.get('size') is not None:
+            if file_size is not None:
                 Node(f"{file_name} ({file_size})", parent=node)
-            else:
-                Node(file_name, parent=node)
 
         output = ""
         for pre, _, node in RenderTree(root):
@@ -183,29 +183,50 @@ class Workbench:
 
 
 
-def create_workbench(bucket_name: str, auth: Auth):
-    bucket = create_bucket(bucket_name, auth_token=auth.get_access_token())
+def create_workbench(bucket_name: str):
+    auth_token = os.environ.get('TINYBIO_AUTH_TOKEN')
+    if not auth_token:
+        print("""
+TINYBIO_AUTH_TOKEN NOT FOUND IN ENVIRONMENT VARIABLES
+
+To create a token click here: https://api.tinybio.cloud/readme-docs/login
+
+SET YOUR TOKEN AS AN ENVIRONMENT VARIABLE:
+import os
+os.environ['TINYBIO_AUTH_TOKEN']='YOUR_TOKEN_HERE'
+
+To gain access to your bucket, run:
+workbench = tiny.Workbench(bucket_name="WORKBENCH_NAME")
+
+Check out these comprehensive tutorials on RNA-Seq, ATAC-Seq, and Variant calling on our docs here: http://docs.tinybio.cloud
+                """)
+        return
+    try:
+        bucket = create_bucket(bucket_name, auth_token=auth_token)
+    except Exception as e:
+        print(e)
+        return
 
     workbench_name = bucket.get('workbench_name')
     print(f"""
-        The {workbench_name} workbench is now available. 
+The {workbench_name} workbench is now available. 
 
-        The command workbench.list_files() will return the list of files in your workbench. Note, by default, we've included files for running through an RNA-Seq, ATAC-Seq, and variant calling experiments which are outline here:
-        
-        https://docs.tinybio.cloud/docs
+The command workbench.ls() will return the list of files in your workbench. Note, by default, we've included files for running through an RNA-Seq, ATAC-Seq, and variant calling experiments which are outline here:
 
-        The command workbench.run(tool=TOOL_NAME, full_command=COMMAND) will create a super computer (16 cores, 256GB RAM) with the specified tool installed and run the command specified in full_command. 
+https://docs.tinybio.cloud/docs
 
-        To check the status of your commands for a workbench please run. workbench.logs(). 
+The command workbench.run(tool=TOOL_NAME, full_command=COMMAND) will create an instance that has 10 cores w/ 32GB RAM. The specified tool preinstalled and will run the command specified in full_command. 
 
-        To upload a file directly from your machine run workbench.upload('file_path_on_your_machine'). Please note, if you're uploading from a colab notebook, you will need to first upload the file to the colab instance and then upload it from that instance. 
+To check the status of your commands for a workbench please run. workbench('JOBID').logs(). 
 
-        To upload from a remote machine run workbench.upload_job(method="curl/wget", files=[("public_file_url","download_path")]). 
+To upload a file directly from your machine run workbench.upload('file_path_on_your_machine'). Please note, if you're uploading from a colab notebook, you will need to first upload the file to the colab instance and then upload it from that instance. 
 
-        To download a file run the following workbench.download('file_path_on_the_workbench'). This will generate a download URL.
+To upload from a remote machine run workbench.upload_job(method="curl or wget", files=[("public_file_url","destination_path_on_workbench")]). 
+
+To download a file run the following workbench.download('file_path_on_the_workbench'). This will generate a download URL.
     """)
 
-    return Workbench(workbench_name, auth)
+    return Workbench(workbench_name)
 
 
 class Job:
