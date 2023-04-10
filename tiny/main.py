@@ -254,18 +254,18 @@ class Job:
     def get_status(self):
         if getattr(JobStatus, self.status.__str__().upper()) in [JobStatus.SUCCEEDED, JobStatus.FAILED, JobStatus.DELETION_IN_PROGRESS]:
             return self.status.__str__()
-        status = get_job(self.job_id, auth_token=self.workbench.auth.get_access_token())
+        status = get_job(self.job_id, workbench_name=self.workbench.bucket_name, auth_token=self.workbench.auth.get_access_token())
         self.status = status
         return status.__str__()
 
     def logs(self):
         try:
-            return get_job_logs(self.job_id, auth_token=self.workbench.auth.get_access_token())
+            return get_job_logs(self.job_id, workbench_name=self.workbench.bucket_name, auth_token=self.workbench.auth.get_access_token())
         except Exception as e:
             print(e)
 
     def stream_logs(self):
         try:
-            stream_job_logs(self.job_id, auth_token=self.workbench.auth.get_access_token())
+            stream_job_logs(self.job_id, workbench_name=self.workbench.bucket_name, auth_token=self.workbench.auth.get_access_token())
         except Exception as e:
             print(e)

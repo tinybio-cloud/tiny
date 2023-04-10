@@ -15,7 +15,7 @@ dependencies = [
 
 setup(
     name='tiny-cli',
-    version='1.0.37',
+    version='1.0.38',
     description='TinyBio genome analysis tool',
     long_description_content_type='text/markdown',
     url='https://github.com/tinybio-cloud/tiny',

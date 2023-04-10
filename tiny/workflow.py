@@ -45,31 +45,31 @@ class JobStatus(enum.Enum):
             'SUCCEEDED': 'Succeeded',
             'FAILED': 'Failed',
             'DELETION IN PROGRESS': 'Deletion in progress',
-            'NOT STARTED': 'Not started'
+            'NOT_STARTED': 'Not started'
         }
         return rep_map.get(self.value)
 
 
-def get_job(job_id: str, auth_token: str) -> json:
-    url = f'{PROD_BASE_URL}/jobs/{job_id}'
+def get_job(job_id: str, workbench_name: str, auth_token: str) -> json:
+    url = f'{PROD_BASE_URL}/{workbench_name}/jobs/{job_id}'
     headers = {'Authorization': f'Bearer {auth_token}'}
     r = httpx.get(url=url, timeout=None, headers=headers)
     if r.status_code != 200:
-        return JobStatus.NOT_STARTED
+        return r.content
     state = r.json().get('state')
     return JobStatus(state)
 
 
-def get_job_logs(job_id: str, auth_token: str) -> json:
-    url = f'{PROD_BASE_URL}/jobs/{job_id}/logs'
+def get_job_logs(job_id: str, workbench_name: str, auth_token: str) -> json:
+    url = f'{PROD_BASE_URL}/{workbench_name}/jobs/{job_id}/logs'
     headers = {'Authorization': f'Bearer {auth_token}'}
     r = httpx.get(url=url, timeout=None, headers=headers)
     if r.status_code != 200:
         raise Exception(f'Failed to get job logs: {r.text}')
     return r.json()
 
-def stream_job_logs(job_id: str, auth_token: str) -> json:
-    url = f'{PROD_BASE_URL}/jobs/{job_id}/logs/stream'
+def stream_job_logs(job_id: str, workbench_name: str, auth_token: str) -> json:
+    url = f'{PROD_BASE_URL}/{workbench_name}/jobs/{job_id}/logs/stream'
     headers = {
         'Authorization': f'Bearer {auth_token}',
     }
