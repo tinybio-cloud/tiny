@@ -35,16 +35,19 @@ class Workbench:
             self.auth = Auth(auth_token)
         else:
             print("""
-                To create a token click here: https://api.tinybio.cloud/readme-docs/login
-                
-                SET YOUR TOKEN AS AN ENVIRONMENT VARIABLE:
-                import os
-                os.environ['TINY_AUTH_TOKEN']='YOUR_TOKEN_HERE'
-                
-                To gain access to your bucket, run:
-                workbench = tiny.Workbench(bucket_name="WORKBENCH_NAME")
 
-                Check out these comprehensive tutorials on RNA-Seq, ATAC-Seq, and Variant calling on our docs here: http://docs.tinybio.cloud
+TINY_AUTH_TOKEN NOT FOUND IN ENVIRONMENT VARIABLES
+
+To create a token click here: https://api.tinybio.cloud/readme-docs/login
+
+SET YOUR TOKEN AS AN ENVIRONMENT VARIABLE:
+import os
+os.environ['TINY_AUTH_TOKEN']='YOUR_TOKEN_HERE'
+
+To gain access to your bucket, run:
+workbench = tiny.Workbench(bucket_name="WORKBENCH_NAME")
+
+Check out these comprehensive tutorials on RNA-Seq, ATAC-Seq, and Variant calling on our docs here: http://docs.tinybio.cloud
             """)
 
     def __repr__(self):
