@@ -115,7 +115,6 @@ Check out these comprehensive tutorials on RNA-Seq, ATAC-Seq, and Variant callin
     def ls(self, path: str = None):
         return self.list_files(path)
 
-    # TODO: rename path to directory?
     def list_files(self, path: str = None):
         files = list_files_in_bucket(
             self.bucket_name,
@@ -184,7 +183,6 @@ Check out these comprehensive tutorials on RNA-Seq, ATAC-Seq, and Variant callin
 
 
 
-#TODO: Make this work properly and add to docs
 def create_workbench(bucket_name: str):
     auth_token = os.environ.get('TINYBIO_AUTH_TOKEN')
     if not auth_token:
