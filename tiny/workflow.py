@@ -16,14 +16,14 @@ def execute_workflow(bucket_name: str, arguments: dict, auth_token: str) -> json
 
 
 class JobStatus(enum.Enum):
-    STATE_UNSPECIFIED = 'STATE_UNSPECIFIED'
+    STATE_UNSPECIFIED = 'STATE UNSPECIFIED'
     QUEUED = 'QUEUED'
     SCHEDULED = 'SCHEDULED'
     RUNNING = 'RUNNING'
     SUCCEEDED = 'SUCCEEDED'
     FAILED = 'FAILED'
-    DELETION_IN_PROGRESS = 'DELETION_IN_PROGRESS'
-    NOT_STARTED = 'NOT_STARTED'
+    DELETION_IN_PROGRESS = 'DELETION IN PROGRESS'
+    NOT_STARTED = 'NOT STARTED'
 
     STATUS_CHOICES = (
         (STATE_UNSPECIFIED, 'State unspecified'),
@@ -44,8 +44,8 @@ class JobStatus(enum.Enum):
             'RUNNING': 'Running',
             'SUCCEEDED': 'Succeeded',
             'FAILED': 'Failed',
-            'DELETION_IN_PROGRESS': 'Deletion in progress',
-            'NOT_STARTED': 'Not started'
+            'DELETION IN PROGRESS': 'Deletion in progress',
+            'NOT STARTED': 'Not started'
         }
         return rep_map.get(self.value)
 

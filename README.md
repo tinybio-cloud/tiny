@@ -62,32 +62,45 @@ Uploading /path/to/file/samplesheet_core.csv to samtools-test-202212082123436990
     tool="samtools", 
     full_command="samtools quickcheck /mnt/gcs/output/mapping/sorted/CRR119890_Aligned_sorted.bam"
 )
-+---------------------+----------+----------+----------------------------------------------+---------------------------------------------------------------------------------+
-| Job ID              | Tool     | Status   | Get Logs                                     | Full Command                                                                    |
-+=====================+==========+==========+==============================================+=================================================================================+
-| samtools-9284deada3 | samtools | Queued   | workbench.jobs['samtools-9284deada3'].logs() | samtools quickcheck /mnt/gcs/output/mapping/sorted/CRR119890_Aligned_sorted.bam |
-+---------------------+----------+----------+----------------------------------------------+---------------------------------------------------------------------------------+
++---------------------+----------+----------+----------+----------------------------------------------+---------------------------------------------------------------------------------+
+| Job ID              | Version  | Tool     | Status   | Get Logs                                     | Full Command                                                                    |
++=====================+==========+==========+==========+==============================================+=================================================================================+
+| samtools-9284deada3 | 1.16     | samtools | Queued   | workbench.jobs['samtools-9284deada3'].logs() | samtools quickcheck /mnt/gcs/output/mapping/sorted/CRR119890_Aligned_sorted.bam |
++---------------------+----------+----------+----------+----------------------------------------------+---------------------------------------------------------------------------------+
 
 # Get status of all jobs
 >>> workbench.jobs()
-+---------------------+----------+-----------+----------------------------------------------+---------------------------------------------------------------------------------+
-| Job ID              | Tool     | Status    | Get Logs                                     | Full Command                                                                    |
-+=====================+==========+===========+==============================================+=================================================================================+
-| samtools-9284deada3 | samtools | Scheduled | workbench.jobs['samtools-9284deada3'].logs() | samtools quickcheck /mnt/gcs/output/mapping/sorted/CRR119890_Aligned_sorted.bam |
-+---------------------+----------+-----------+----------------------------------------------+---------------------------------------------------------------------------------+
++---------------------+----------+----------+-----------+----------------------------------------------+---------------------------------------------------------------------------------+
+| Job ID              | Version  | Tool     | Status    | Get Logs                                     | Full Command                                                                    |
++=====================+==========+==========+===========+==============================================+=================================================================================+
+| samtools-9284deada3 | 1.16     | samtools | Scheduled | workbench.jobs['samtools-9284deada3'].logs() | samtools quickcheck /mnt/gcs/output/mapping/sorted/CRR119890_Aligned_sorted.bam |
++---------------------+----------+----------+-----------+----------------------------------------------+---------------------------------------------------------------------------------+
 
 
 # Get status of a single job
->>> fastqc.status()
+>>> workbench.jobs('samtools-9284deada3').get_status()
+Running
 or
->>> workbench.jobs['jobID'].get_status()
-state.RUNNING
+>>> workbench.jobs('samtools-9284deada3').__str__()
++---------------------+----------+----------+-----------+----------------------------------------------+---------------------------------------------------------------------------------+
+| Job ID              | Version  | Tool     | Status    | Get Logs                                     | Full Command                                                                    |
++=====================+==========+==========+===========+==============================================+=================================================================================+
+| samtools-9284deada3 | 1.16     | samtools | Scheduled | workbench.jobs['samtools-9284deada3'].logs() | samtools quickcheck /mnt/gcs/output/mapping/sorted/CRR119890_Aligned_sorted.bam |
++---------------------+----------+----------+-----------+----------------------------------------------+---------------------------------------------------------------------------------+
 
 # Get logs of a job
->>> fastqc.logs()
-or
->>> workbench.jobs[0].logs()
-[, 'Analysis complete for SRR6357070_1.fastq.gz', '\n', 'Started analysis of SRR6357070_2.fastq.gz\n', 'Approx 5% complete for SRR6357070_2.fastq.gz\n', ....]
+>>> workbench.jobs('samtools-9284deada3').logs()
+'Analysis complete for SRR6357070_1.fastq.gz' 
+'Started analysis of SRR6357070_2.fastq.gz'
+'Approx 5% complete for SRR6357070_2.fastq.gz\n'
+....
+
+# Stream logs of a job
+>>> workbench.jobs('samtools-9284deada3').stream_logs()
+'Analysis complete for SRR6357070_1.fastq.gz' 
+'Started analysis of SRR6357070_2.fastq.gz'
+'Approx 5% complete for SRR6357070_2.fastq.gz\n'
+....
 
 # list files on your workbench
 >>> workbench.list_files()
@@ -137,8 +150,6 @@ files = [
 # you can exclude certain statuses from the list of jobs
 >>> workbench.jobs(exclude=['Succeeded'])
 
-# Stream logs of a job
->>> workbench.jobs('samtools123').stream_logs()
 
 # List files in a directory on your workbench
 >>> workbench.ls('output/')
