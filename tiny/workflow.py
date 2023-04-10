@@ -73,7 +73,7 @@ def stream_job_logs(job_id: str, workbench_name: str, auth_token: str) -> json:
     headers = {
         'Authorization': f'Bearer {auth_token}',
     }
-    with httpx.stream('GET', url) as r:
+    with httpx.stream('GET', url, headers=headers) as r:
         try:
             for chunk in r.iter_raw():  # or, for line in r.iter_lines():
                 print(chunk.decode('utf-8').strip())
