@@ -165,6 +165,14 @@ reproduce-covid-paper-20230404201606359927
         ├── CRR119890_Log.final.out
         │   └── output/mapping/CRR119890_Log.final.out (2.0 kB)
 
+# create a directory on your workbench
+>>> wb.create_directory('/foo/bar')
++----------------------------------+-------------------------+-------------------+
+| Workbench                        | Directory               | Message           |
++==================================+=========================+===================+
+| test-20230412165811062848        | /foo/bar                | Directory created |
++----------------------------------+-------------------------+-------------------+
+
 ```
 
 ### Distribute package to PIP
