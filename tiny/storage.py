@@ -135,7 +135,7 @@ def upload_file_path(workbench_name: str, files: List[Tuple[str, str]], auth_tok
     return response
 
 
-def create_workbench(workbench_name: str, auth_token: str) -> json:
+def create_bucket(workbench_name: str, auth_token: str) -> json:
     """
     Creates a workbench
     :param workbench_name: name of workbench

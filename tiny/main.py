@@ -7,7 +7,7 @@ import httpx
 from tabulate import tabulate
 from anytree import Node, RenderTree
 
-from .storage import upload_files, download_file, list_files_in_workbench, upload_file_path, create_workbench, move_file
+from .storage import upload_files, download_file, list_files_in_workbench, upload_file_path, create_bucket, move_file
 from .workflow import execute_workflow, get_job, get_job_logs, JobStatus, stream_job_logs
 from .settings import PROD_BASE_URL
 
@@ -202,14 +202,14 @@ Check out these comprehensive tutorials on RNA-Seq, ATAC-Seq, and Variant callin
                 """)
         return
     try:
-        bucket = create_workbench(workbench_name, auth_token=auth_token)
+        bucket = create_bucket(workbench_name, auth_token=auth_token)
     except Exception as e:
         print(e)
         return
 
-    workbench_name = bucket.get('name')
+    generate_workbench_name = bucket.get('workbench_name')
     print(f"""
-The {workbench_name} workbench is now available. 
+The {generate_workbench_name} workbench is now available. 
 
 The command workbench.ls() will return the list of files in your workbench. Note, by default, we've included files for running through an RNA-Seq, ATAC-Seq, and variant calling experiments which are outline here:
 
@@ -226,7 +226,7 @@ To upload from a remote machine run workbench.upload_job(method="curl or wget", 
 To download a file run the following workbench.download('file_path_on_the_workbench'). This will generate a download URL.
     """)
 
-    return Workbench(workbench_name)
+    return Workbench(generate_workbench_name)
 
 
 class Job:
