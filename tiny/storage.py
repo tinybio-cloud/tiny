@@ -10,33 +10,33 @@ from .settings import PROD_BASE_URL
 INPUT_PREFIX: str = 'input/'
 
 
-def download_file(bucket_name: str, remote_file: str, auth_token: str) -> json:
+def download_file(workbench_name: str, remote_file: str, auth_token: str) -> json:
     """
-    Downloads a file from a bucket
-    :param bucket_name: name of bucket
+    Downloads a file from a workbench
+    :param workbench_name: name of workbench
     :param remote_file: full path of remote file
     :param auth_token: auth token provided by logging in
     :return:
     """
     query_params = {'file_path': remote_file}
-    url = f"{PROD_BASE_URL}/workbench/{bucket_name}/download"
+    url = f"{PROD_BASE_URL}/workbench/{workbench_name}/download"
     headers = {'Authorization': f'Bearer {auth_token}'}
     r = httpx.get(url, timeout=None, params=query_params, headers=headers)
     if r.status_code != 200:
-        raise Exception(f"Error downloading file {remote_file} from bucket {bucket_name}")
+        raise Exception(f"Error downloading file {remote_file} from workbench {workbench_name}")
 
     return r.json()
 
 
-def list_files_in_bucket(bucket_name: str, auth_token: str, path: str = None) -> json:
+def list_files_in_workbench(workbench_name: str, auth_token: str, path: str = None) -> json:
     """
-    Lists files in a bucket
-    :param bucket_name: name of bucket
+    Lists files in a workbench
+    :param workbench_name: name of workbench
     :param path: path to list files in
     :param auth_token: auth token provided by logging in
     :return:
     """
-    url = f"{PROD_BASE_URL}/workbench/{bucket_name}"
+    url = f"{PROD_BASE_URL}/workbench/{workbench_name}"
     if path:
         url += f"?path={path}"
 
@@ -45,37 +45,36 @@ def list_files_in_bucket(bucket_name: str, auth_token: str, path: str = None) ->
     r = httpx.get(url, timeout=None, headers=headers)
     if r.status_code != 200:
         raise Exception(r.content)
-        # raise Exception(f"Error listing files in bucket {bucket_name}")
 
     return r.json()
 
 
-def _upload_blob(bucket_name: str, source_file_name: str, auth_token: str) -> json:
-    """Uploads a file to the bucket."""
-    # The ID of your GCS bucket
-    # bucket_name = "your-bucket-name"
+def _upload_blob(workbench_name: str, source_file_name: str, auth_token: str) -> json:
+    """Uploads a file to the workbench."""
+    # The ID of your GCS workbench
+    # name = "your-workbench-name"
     # The path to your file to upload
     # source_file_name = "local/path/to/file"
 
     # from requests_toolbelt import MultipartEncoder
-    url = f"{PROD_BASE_URL}/workbench/{bucket_name}/upload"
+    url = f"{PROD_BASE_URL}/workbench/{workbench_name}/upload"
     # m = MultipartEncoder(fields={'file': (source_file_name, open(source_file_name, 'rb'))})
     # r = requests.post(url, data=m, headers={'Content-Type': m.content_type})
     files = {'file': open(source_file_name, 'rb')}
-    print(f'Uploading {source_file_name} to {bucket_name}')
+    print(f'Uploading {source_file_name} to {workbench_name}')
     headers = {'Authorization': f'Bearer {auth_token}'}
     r = httpx.post(url, files=files, timeout=None, headers=headers)
     if r.status_code != 200:
         print(r.text)
-        raise Exception(f"Error uploading file {source_file_name} to bucket {bucket_name}")
+        raise Exception(f"Error uploading file {source_file_name} to workbench {workbench_name}")
 
     return r.json()
 
 
-def upload_files(bucket_name: str, local_files: str, auth_token: str) -> dict:
+def upload_files(workbench_name: str, local_files: str, auth_token: str) -> dict:
     """
-    Uploads a list or single files to a bucket
-    :param bucket_name: name of bucket
+    Uploads a list or single files to a workbench
+    :param workbench_name: name of workbench
     :param local_files: full path of local file or directory
     :param auth_token: auth token provided by logging in
     :return:
@@ -95,11 +94,11 @@ def upload_files(bucket_name: str, local_files: str, auth_token: str) -> dict:
             files = [f for f in listdir(local_files) if isfile(join(local_files, f))]
             for file in files:
                 local_file = source_path + file
-                _upload_blob(bucket_name, local_file, auth_token)
+                _upload_blob(workbench_name, local_file, auth_token)
                 destination_blob_name = dir_prefix + '/' + file
                 file_mapping[local_file] = destination_blob_name
         else:
-            _upload_blob(bucket_name, source_path, auth_token)
+            _upload_blob(workbench_name, source_path, auth_token)
             destination_blob_name = dir_prefix
             file_mapping[source_path] = destination_blob_name
 
@@ -108,10 +107,10 @@ def upload_files(bucket_name: str, local_files: str, auth_token: str) -> dict:
         raise e
 
 
-def upload_file_path(bucket_name: str, files: List[Tuple[str, str]], auth_token: str, method: str = 'curl') -> list[Any]:
+def upload_file_path(workbench_name: str, files: List[Tuple[str, str]], auth_token: str, method: str = 'curl') -> list[Any]:
     """
-    creates a job that will download a list or single files to a bucket
-    :param bucket_name: name of bucket
+    creates a job that will download a list or single files to a workbench
+    :param workbench_name: name of workbench
     :param files: list of tuples (url, output path)
     :param auth_token: auth token provided by logging in
     :param method: method to use to download file
@@ -121,7 +120,7 @@ def upload_file_path(bucket_name: str, files: List[Tuple[str, str]], auth_token:
     for file in files:
         input_url = file[0]
         output_path = file[1]
-        url = f"{PROD_BASE_URL}/workbench/{bucket_name}/upload/file-url"
+        url = f"{PROD_BASE_URL}/workbench/{workbench_name}/upload/file-url"
         headers = {'Authorization': f'Bearer {auth_token}'}
         data = {
             'input_url': input_url,
@@ -136,14 +135,14 @@ def upload_file_path(bucket_name: str, files: List[Tuple[str, str]], auth_token:
     return response
 
 
-def create_bucket(bucket_name: str, auth_token: str) -> json:
+def create_workbench(workbench_name: str, auth_token: str) -> json:
     """
-    Creates a bucket
-    :param bucket_name: name of bucket
+    Creates a workbench
+    :param workbench_name: name of workbench
     :param auth_token: auth token provided by logging in
     :return:
     """
-    url = f"{PROD_BASE_URL}/workbench/{bucket_name}"
+    url = f"{PROD_BASE_URL}/workbench/{workbench_name}"
     headers = {'Authorization': f'Bearer {auth_token}'}
     r = httpx.post(url, timeout=None, headers=headers)
     if r.status_code != 200:
@@ -152,18 +151,18 @@ def create_bucket(bucket_name: str, auth_token: str) -> json:
     return r.json()
 
 
-def move_file(bucket_name: str, source_file: str, destination_file: str, auth_token: str) -> json:
+def move_file(workbench_name: str, source_file: str, destination_file: str, auth_token: str) -> json:
     """
-    Moves a file in a bucket
-    :param bucket_name: name of bucket
+    Moves a file in a workbench
+    :param workbench_name: name of workbench
     :param source_file: full path of source file
     :param destination_file: full path of destination file
     :param auth_token: auth token provided by logging in
     :return:
-    Cannot rename folders curretly only files
+    Cannot rename folders currently only files
     """
 
-    url = f"{PROD_BASE_URL}/workbench/{bucket_name}/move-file"
+    url = f"{PROD_BASE_URL}/workbench/{workbench_name}/move-file"
     headers = {'Authorization': f'Bearer {auth_token}'}
     data = {
         'source_file_name': source_file,

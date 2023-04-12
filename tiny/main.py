@@ -7,7 +7,7 @@ import httpx
 from tabulate import tabulate
 from anytree import Node, RenderTree
 
-from .storage import upload_files, download_file, list_files_in_bucket, upload_file_path, create_bucket, move_file
+from .storage import upload_files, download_file, list_files_in_workbench, upload_file_path, create_workbench, move_file
 from .workflow import execute_workflow, get_job, get_job_logs, JobStatus, stream_job_logs
 from .settings import PROD_BASE_URL
 
@@ -28,8 +28,8 @@ class Auth:
 
 
 class Workbench:
-    def __init__(self, bucket_name: str):
-        self.bucket_name = bucket_name
+    def __init__(self, workbench_name: str):
+        self.name = workbench_name
         self._jobs = {}
         auth_token = os.environ.get('TINYBIO_AUTH_TOKEN')
         if auth_token:
@@ -44,14 +44,14 @@ SET YOUR TOKEN AS AN ENVIRONMENT VARIABLE:
 import os
 os.environ['TINYBIO_AUTH_TOKEN']='YOUR_TOKEN_HERE'
 
-To gain access to your bucket, run:
-workbench = tiny.Workbench(bucket_name="WORKBENCH_NAME")
+To gain access to your workbench, run:
+workbench = tiny.Workbench(name="WORKBENCH_NAME")
 
 Check out these comprehensive tutorials on RNA-Seq, ATAC-Seq, and Variant calling on our docs here: http://docs.tinybio.cloud
             """)
 
     def __repr__(self):
-        return f'Workbench({self.bucket_name})'
+        return f'Workbench({self.name})'
 
     def _add_job(self, job: 'Job'):
         self._jobs[job.job_id] = job
@@ -67,7 +67,7 @@ Check out these comprehensive tutorials on RNA-Seq, ATAC-Seq, and Variant callin
         }
         status = JobStatus.QUEUED.__str__()
         try:
-            execution = execute_workflow(self.bucket_name, arguments, auth_token=self.auth.get_access_token())
+            execution = execute_workflow(self.name, arguments, auth_token=self.auth.get_access_token())
             job = Job(
                 job_id=execution.get('id'),
                 tool=execution.get('tool'),
@@ -96,32 +96,32 @@ Check out these comprehensive tutorials on RNA-Seq, ATAC-Seq, and Variant callin
 
     def upload_file(self, file) -> dict:
         try:
-            uploaded_files = upload_files(self.bucket_name, file, auth_token=self.auth.get_access_token())
+            uploaded_files = upload_files(self.name, file, auth_token=self.auth.get_access_token())
             return uploaded_files
         except Exception as e:
             print(e)
 
     def download(self, file) -> dict:
         try:
-            return download_file(self.bucket_name, file, auth_token=self.auth.get_access_token())
+            return download_file(self.name, file, auth_token=self.auth.get_access_token())
         except Exception as e:
             print(e)
 
     def file_exists_in_bucket(self, file):
         input_file_path = f'input/{file}'
-        return input_file_path in list_files_in_bucket(self.bucket_name,
-                                                       auth_token=self.auth.get_access_token()), input_file_path
+        return input_file_path in list_files_in_workbench(self.name,
+                                                          auth_token=self.auth.get_access_token()), input_file_path
 
     def ls(self, path: str = None):
         return self.list_files(path)
 
     def list_files(self, path: str = None):
-        files = list_files_in_bucket(
-            self.bucket_name,
+        files = list_files_in_workbench(
+            self.name,
             auth_token=self.auth.get_access_token(),
             path=path
         )
-        root = Node(self.bucket_name)
+        root = Node(self.name)
         for file in files:
             file_name = file.get('name')
             file_size = file.get('size')
@@ -144,7 +144,7 @@ Check out these comprehensive tutorials on RNA-Seq, ATAC-Seq, and Variant callin
         print(output)
 
     def upload_job(self, files: List[Tuple[str, str]], method: str = 'curl'):
-        upload_jobs = upload_file_path(self.bucket_name, files=files, method=method,
+        upload_jobs = upload_file_path(self.name, files=files, method=method,
                                        auth_token=self.auth.get_access_token())
         table = []
         for job in upload_jobs:
@@ -176,14 +176,14 @@ Check out these comprehensive tutorials on RNA-Seq, ATAC-Seq, and Variant callin
         print_table(headers, table)
 
     def move_file(self, source, destination):
-        response = move_file(self.bucket_name, source, destination, auth_token=self.auth.get_access_token())
+        response = move_file(self.name, source, destination, auth_token=self.auth.get_access_token())
         headers = ['Source', 'Destination', 'Message']
         table = [[source, destination, response.get('message')]]
         print_table(headers, table)
 
 
 
-def create_workbench(bucket_name: str):
+def create_workbench(workbench_name: str):
     auth_token = os.environ.get('TINYBIO_AUTH_TOKEN')
     if not auth_token:
         print("""
@@ -195,19 +195,19 @@ SET YOUR TOKEN AS AN ENVIRONMENT VARIABLE:
 import os
 os.environ['TINYBIO_AUTH_TOKEN']='YOUR_TOKEN_HERE'
 
-To gain access to your bucket, run:
-workbench = tiny.Workbench(bucket_name="WORKBENCH_NAME")
+To gain access to your workbench, run:
+workbench = tiny.Workbench(name="WORKBENCH_NAME")
 
 Check out these comprehensive tutorials on RNA-Seq, ATAC-Seq, and Variant calling on our docs here: http://docs.tinybio.cloud
                 """)
         return
     try:
-        bucket = create_bucket(bucket_name, auth_token=auth_token)
+        bucket = create_workbench(workbench_name, auth_token=auth_token)
     except Exception as e:
         print(e)
         return
 
-    workbench_name = bucket.get('workbench_name')
+    workbench_name = bucket.get('name')
     print(f"""
 The {workbench_name} workbench is now available. 
 
@@ -254,18 +254,18 @@ class Job:
     def get_status(self):
         if getattr(JobStatus, self.status.__str__().upper()) in [JobStatus.SUCCEEDED, JobStatus.FAILED, JobStatus.DELETION_IN_PROGRESS]:
             return self.status.__str__()
-        status = get_job(self.job_id, workbench_name=self.workbench.bucket_name, auth_token=self.workbench.auth.get_access_token())
+        status = get_job(self.job_id, workbench_name=self.workbench.name, auth_token=self.workbench.auth.get_access_token())
         self.status = status
         return status.__str__()
 
     def logs(self):
         try:
-            return get_job_logs(self.job_id, workbench_name=self.workbench.bucket_name, auth_token=self.workbench.auth.get_access_token())
+            return get_job_logs(self.job_id, workbench_name=self.workbench.name, auth_token=self.workbench.auth.get_access_token())
         except Exception as e:
             print(e)
 
     def stream_logs(self):
         try:
-            stream_job_logs(self.job_id, workbench_name=self.workbench.bucket_name, auth_token=self.workbench.auth.get_access_token())
+            stream_job_logs(self.job_id, workbench_name=self.workbench.name, auth_token=self.workbench.auth.get_access_token())
         except Exception as e:
             print(e)
