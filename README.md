@@ -28,7 +28,7 @@ or
 >>> os.environ['TINYBIO_AUTH_TOKEN']='YOUR_TOKEN_HERE'
 
 # Create a workbench or use your existing workbench
->>> workbench = tiny.create_workbench('workbench_name')
+>>> workbench = tiny.create_workbench('name')
 The testing-delete-me-20230410160630063331 workbench is now available. 
 
 The command workbench.ls() will return the list of files in your workbench. Note, by default, we've included files for running through an RNA-Seq, ATAC-Seq, and variant calling experiments which are outline here:

@@ -6,8 +6,8 @@ import httpx
 from .settings import PROD_BASE_URL
 
 
-def execute_workflow(bucket_name: str, arguments: dict, auth_token: str) -> json:
-    url = f'{PROD_BASE_URL}/workbench/{bucket_name}/run'
+def execute_workflow(workbench_name: str, arguments: dict, auth_token: str) -> json:
+    url = f'{PROD_BASE_URL}/workbench/{workbench_name}/run'
     headers = {'Authorization': f'Bearer {auth_token}'}
     r = httpx.post(url=url, json=arguments, timeout=None, headers=headers)
     if r.status_code != 200:
