@@ -7,7 +7,8 @@ import httpx
 from tabulate import tabulate
 from anytree import Node, RenderTree
 
-from .storage import upload_files, download_file, list_files_in_workbench, upload_file_path, create_bucket, move_file
+from .storage import upload_files, download_file, list_files_in_workbench, upload_file_path, create_bucket, move_file, \
+    create_directory
 from .workflow import execute_workflow, get_job, get_job_logs, JobStatus, stream_job_logs
 from .settings import PROD_BASE_URL
 
@@ -176,10 +177,22 @@ Check out these comprehensive tutorials on RNA-Seq, ATAC-Seq, and Variant callin
         print_table(headers, table)
 
     def move_file(self, source, destination):
-        response = move_file(self.name, source, destination, auth_token=self.auth.get_access_token())
-        headers = ['Source', 'Destination', 'Message']
-        table = [[source, destination, response.get('message')]]
-        print_table(headers, table)
+        try:
+            response = move_file(self.name, source, destination, auth_token=self.auth.get_access_token())
+            headers = ['Source', 'Destination', 'Message']
+            table = [[source, destination, response.get('message')]]
+            print_table(headers, table)
+        except Exception as e:
+            print(e)
+
+    def create_directory(self, directory):
+        try:
+            response = create_directory(self.name, directory, auth_token=self.auth.get_access_token())
+            headers = ['Workbench', 'Directory', 'Message']
+            table = [[self.name, response.get('path'), "Directory created"]]
+            print_table(headers, table)
+        except Exception as e:
+            print(e)
 
 
 

@@ -173,3 +173,23 @@ def move_file(workbench_name: str, source_file: str, destination_file: str, auth
         return {'message': json.loads(r.content).get('detail')}
 
     return r.json()
+
+
+def create_directory(workbench_name: str, directory: str, auth_token: str) -> json:
+    """
+    Creates a directory in a workbench
+    :param workbench_name: name of workbench
+    :param directory: full path of directory
+    :param auth_token: auth token provided by logging in
+    :return:
+    """
+    url = f"{PROD_BASE_URL}/workbench/{workbench_name}/create-directory"
+    headers = {'Authorization': f'Bearer {auth_token}'}
+    query_params = {
+        'path': directory
+    }
+    r = httpx.post(url, timeout=None, headers=headers,  params=query_params)
+    if r.status_code != 200:
+        raise Exception(r.content)
+
+    return r.json()
