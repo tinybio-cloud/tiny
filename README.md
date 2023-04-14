@@ -3,6 +3,8 @@
 ### To use (with caution) for testing, simply do:
 **Currently, this utilizes your local google oauth credentials.**
 
+Tinybio is a python tool for quickly running bioinformatics jobs on on a powerful cloud computer. The main feature of tinybio is being able to spin up and run bioinformatics commands on files that are stored on tinybio storage buckets that we’ll refer to as workbenches. 
+
 ### Install
 ```
 pip install tiny-cli
