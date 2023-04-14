@@ -5,12 +5,7 @@
 
 ### Install
 ```
-git clone https://github.com/tinybio-cloud/tiny.git
-cd tiny
-
-python -m venv env
-source env/bin/activate 
-pip install .
+pip install tiny-cli
 ```
 
 ### Usage
@@ -53,7 +48,7 @@ Uploading /path/to/file/samplesheet_core.csv to samtools-test-202212082123436990
 
 # Run a job
 # all jobs run are stored as Job objects on the workbench to access them use workbench.jobs
->>> fastqc = workbench.run(
+>>> workbench.run(
     tool="samtools", 
     full_command="samtools quickcheck /output/mapping/sorted/CRR119890_Aligned_sorted.bam"
 )
