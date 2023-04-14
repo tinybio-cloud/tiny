@@ -12,7 +12,7 @@ pip install tiny-cli
 ```shell
 
 # build auth page
-get your auth token from https://tiny.bio/login
+get your auth token from https://tinybio.cloud/login
 
 >>> import tiny
 
