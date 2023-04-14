@@ -10,17 +10,13 @@ pip install tiny-cli
 
 ### Usage
 ```shell
-
-# build auth page
-get your auth token from https://tinybio.cloud/login
-
->>> import tiny
+#get your auth token from https://api.tinybio.cloud/readme-docs/login
 
 # Add your auth token to the environment
->>> export TINYBIO_AUTH_TOKEN=your_auth_token
-or
 >>> import os
 >>> os.environ['TINYBIO_AUTH_TOKEN']='YOUR_TOKEN_HERE'
+
+>>> import tiny
 
 # Create a workbench or use your existing workbench
 >>> workbench = tiny.create_workbench('name')
@@ -42,7 +38,6 @@ To download a file run the following workbench.download('file_path_on_the_workbe
     
 Workbench(testing-delete-me-20230410160630063331)
 
-
 # initialize your workbench
 >>> workbench = tiny.Workbench('rna-seq-test')
 
@@ -55,12 +50,12 @@ Uploading /path/to/file/samplesheet_core.csv to samtools-test-202212082123436990
 # all jobs run are stored as Job objects on the workbench to access them use workbench.jobs
 >>> workbench.run(
     tool="samtools", 
-    full_command="samtools quickcheck output/mapping/sorted/CRR119890_Aligned_sorted.bam"
+    full_command="samtools quickcheck /output/mapping/sorted/CRR119890_Aligned_sorted.bam"
 )
 +---------------------+----------+----------+----------+----------------------------------------------+---------------------------------------------------------------------------------+
 | Job ID              | Version  | Tool     | Status   | Get Logs                                     | Full Command                                                                    |
 +=====================+==========+==========+==========+==============================================+=================================================================================+
-| samtools-9284deada3 | 1.16     | samtools | Queued   | workbench.jobs['samtools-9284deada3'].logs() | samtools quickcheck output/mapping/sorted/CRR119890_Aligned_sorted.bam |
+| samtools-9284deada3 | 1.16     | samtools | Queued   | workbench.jobs['samtools-9284deada3'].logs() | samtools quickcheck /output/mapping/sorted/CRR119890_Aligned_sorted.bam |
 +---------------------+----------+----------+----------+----------------------------------------------+---------------------------------------------------------------------------------+
 
 # Get status of all jobs
@@ -68,7 +63,7 @@ Uploading /path/to/file/samplesheet_core.csv to samtools-test-202212082123436990
 +---------------------+----------+----------+-----------+----------------------------------------------+---------------------------------------------------------------------------------+
 | Job ID              | Version  | Tool     | Status    | Get Logs                                     | Full Command                                                                    |
 +=====================+==========+==========+===========+==============================================+=================================================================================+
-| samtools-9284deada3 | 1.16     | samtools | Scheduled | workbench.jobs['samtools-9284deada3'].logs() | samtools quickcheck output/mapping/sorted/CRR119890_Aligned_sorted.bam |
+| samtools-9284deada3 | 1.16     | samtools | Scheduled | workbench.jobs['samtools-9284deada3'].logs() | samtools quickcheck /output/mapping/sorted/CRR119890_Aligned_sorted.bam |
 +---------------------+----------+----------+-----------+----------------------------------------------+---------------------------------------------------------------------------------+
 
 
@@ -80,7 +75,7 @@ or
 +---------------------+----------+----------+-----------+----------------------------------------------+---------------------------------------------------------------------------------+
 | Job ID              | Version  | Tool     | Status    | Get Logs                                     | Full Command                                                                    |
 +=====================+==========+==========+===========+==============================================+=================================================================================+
-| samtools-9284deada3 | 1.16     | samtools | Scheduled | workbench.jobs['samtools-9284deada3'].logs() | samtools quickcheck output/mapping/sorted/CRR119890_Aligned_sorted.bam |
+| samtools-9284deada3 | 1.16     | samtools | Scheduled | workbench.jobs['samtools-9284deada3'].logs() | samtools quickcheck /output/mapping/sorted/CRR119890_Aligned_sorted.bam |
 +---------------------+----------+----------+-----------+----------------------------------------------+---------------------------------------------------------------------------------+
 
 # Get logs of a job
@@ -168,6 +163,17 @@ reproduce-covid-paper-20230404201606359927
 | test-20230412165811062848        | /foo/bar                | Directory created |
 +----------------------------------+-------------------------+-------------------+
 
+# list workbenches
+>>> tiny.list_workbenches()
++--------------------------------------------+----------+----------------+
+| Workbench Name                             | Size     | Last Updated   |
++============================================+==========+================+
+| atac-seq-20230406175308669217              | 161.7 GB | 7 days ago     |
++--------------------------------------------+----------+----------------+
+| reproduce-covid-paper-20230404201606359927 | 582.4 GB | 9 days ago     |
++--------------------------------------------+----------+----------------+
+| rna-seq-20230410171413789657               | 46.2 GB  | 3 days ago     |
++--------------------------------------------+----------+----------------+
 ```
 
 ### Distribute package to PIP

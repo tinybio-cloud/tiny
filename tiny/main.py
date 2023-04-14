@@ -2,21 +2,26 @@ import json
 import os
 from datetime import datetime
 from typing import List, Tuple
+import humanize
 
 import httpx
 from tabulate import tabulate
 from anytree import Node, RenderTree
 
 from .storage import upload_files, download_file, list_files_in_workbench, upload_file_path, create_bucket, move_file, \
-    create_directory
+    create_directory, get_workbenches
 from .workflow import execute_workflow, get_job, get_job_logs, JobStatus, stream_job_logs
 from .settings import PROD_BASE_URL
 
 
-def print_table(headers, table_data, maxcolwidths=[None, None, 60, 60, 80]):
+def print_table(headers, table_data, maxcolwidths=[None, None, 60, 60, 80], sort=None):
     """
     Print table using specified headers, table data, format, and column width.
     """
+    if sort:
+        col_idx, order = sort
+        table_data = sorted(table_data, key=lambda row: row[col_idx], reverse=order == "desc")
+
     print(tabulate(table_data, headers=headers, tablefmt="grid", maxcolwidths=maxcolwidths))
 
 
@@ -56,10 +61,6 @@ Check out these comprehensive tutorials on RNA-Seq, ATAC-Seq, and Variant callin
 
     def _add_job(self, job: 'Job'):
         self._jobs[job.job_id] = job
-
-    def remove_job(self, job_id):
-        if job_id in self._jobs:
-            del self._jobs[job_id]
 
     def run(self, tool: str, full_command: str):
         arguments = {
@@ -195,25 +196,22 @@ Check out these comprehensive tutorials on RNA-Seq, ATAC-Seq, and Variant callin
             print(e)
 
 
+def list_workbenches():
+    auth_token = os.environ.get('TINYBIO_AUTH_TOKEN')
+
+    workbenches = get_workbenches(auth_token=auth_token)
+    table = []
+    for workbench in workbenches:
+        updated_at = datetime.strptime(workbench.get('updated_at'), '%Y-%m-%dT%H:%M:%S.%f')
+        table.append([workbench.get('name'), humanize.naturalsize(workbench.get('size')), humanize.naturaltime(datetime.now() - updated_at)])
+
+    headers = ['Workbench Name', 'Size', 'Last Updated', ]
+
+    # format the table using tabulate
+    print_table(headers, table, sort=(0, "asc"))
 
 def create_workbench(workbench_name: str):
     auth_token = os.environ.get('TINYBIO_AUTH_TOKEN')
-    if not auth_token:
-        print("""
-TINYBIO_AUTH_TOKEN NOT FOUND IN ENVIRONMENT VARIABLES
-
-To create a token click here: https://api.tinybio.cloud/readme-docs/login
-
-SET YOUR TOKEN AS AN ENVIRONMENT VARIABLE:
-import os
-os.environ['TINYBIO_AUTH_TOKEN']='YOUR_TOKEN_HERE'
-
-To gain access to your workbench, run:
-workbench = tiny.Workbench(name="WORKBENCH_NAME")
-
-Check out these comprehensive tutorials on RNA-Seq, ATAC-Seq, and Variant calling on our docs here: http://docs.tinybio.cloud
-                """)
-        return
     try:
         bucket = create_bucket(workbench_name, auth_token=auth_token)
     except Exception as e:
