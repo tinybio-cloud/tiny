@@ -5,12 +5,7 @@
 
 ### Install
 ```
-git clone https://github.com/tinybio-cloud/tiny.git
-cd tiny
-
-python -m venv env
-source env/bin/activate 
-pip install .
+pip install tiny-cli
 ```
 
 ### Usage
