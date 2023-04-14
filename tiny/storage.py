@@ -193,3 +193,17 @@ def create_directory(workbench_name: str, directory: str, auth_token: str) -> js
         raise Exception(r.content)
 
     return r.json()
+
+
+def get_workbenches(auth_token: str) -> json:
+    """
+    Gets a list of workbenches
+    :return:
+    """
+    url = f"{PROD_BASE_URL}/workbench/me"
+    headers = {'Authorization': f'Bearer {auth_token}'}
+    r = httpx.get(url, headers=headers, timeout=None)
+    if r.status_code != 200:
+        raise Exception(r.content)
+
+    return r.json()
