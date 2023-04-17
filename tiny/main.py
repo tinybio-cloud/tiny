@@ -9,7 +9,7 @@ from tabulate import tabulate
 from anytree import Node, RenderTree
 
 from .storage import upload_files, download_file, list_files_in_workbench, upload_file_path, create_bucket, move_file, \
-    create_directory, get_workbenches
+    create_directory, get_workbenches, delete_path
 from .workflow import execute_workflow, get_job, get_job_logs, JobStatus, stream_job_logs
 from .settings import PROD_BASE_URL
 
@@ -195,6 +195,15 @@ Check out these comprehensive tutorials on RNA-Seq, ATAC-Seq, and Variant callin
         except Exception as e:
             print(e)
 
+    def delete_path(self, path):
+        try:
+            response = delete_path(self.name, path, auth_token=self.auth.get_access_token())
+            headers = ['Workbench', 'Path', 'Message']
+            table = [[self.name, response.get('path'), response.get('status')]]
+            print_table(headers, table)
+        except Exception as e:
+            print(e)
+
 
 def list_workbenches():
     auth_token = os.environ.get('TINYBIO_AUTH_TOKEN')
@@ -260,7 +269,7 @@ class Job:
     def __str__(self):
         headers = ['Job ID', 'Tool', 'Version', 'Status', 'Get Logs', 'Full Command']
         data = [[self.job_id, self.tool, self.version, self.get_status(), f"workbench.jobs('{self.job_id}').logs()", self.full_command]]
-        print_table(headers, data)
+        return print_table(headers, data)
 
     def get_status(self):
         if getattr(JobStatus, self.status.__str__().upper()) in [JobStatus.SUCCEEDED, JobStatus.FAILED, JobStatus.DELETION_IN_PROGRESS]:

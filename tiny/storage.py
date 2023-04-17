@@ -195,6 +195,26 @@ def create_directory(workbench_name: str, directory: str, auth_token: str) -> js
     return r.json()
 
 
+def delete_path(workbench_name: str, path: str, auth_token: str) -> json:
+    """
+    Deletes a file or directory in a workbench
+    :param workbench_name: name of workbench
+    :param path: full path of file or directory
+    :param auth_token: auth token provided by logging in
+    :return:
+    """
+    url = f"{PROD_BASE_URL}/workbench/{workbench_name}/delete-path"
+    headers = {'Authorization': f'Bearer {auth_token}'}
+    query_params = {
+        'path': path
+    }
+    r = httpx.delete(url, timeout=None, headers=headers,  params=query_params)
+    if r.status_code != 200:
+        raise Exception(r.content)
+
+    return r.json()
+
+
 def get_workbenches(auth_token: str) -> json:
     """
     Gets a list of workbenches
