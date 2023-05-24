@@ -16,13 +16,13 @@ dependencies = [
 
 setup(
     name='tiny-cli',
-    version='1.0.44',
-    description='TinyBio genome analysis tool',
+    version='0.1.0',
+    description='tinybio cli allows you to run your genomic tools in the cloud quickly and easily.',
     long_description_content_type='text/markdown',
     url='https://github.com/tinybio-cloud/tiny',
     long_description=readme(),
     author='TinyBio LLC',
-    author_email='tiny-packages@tinybio.cloud',
+    author_email='vishal@tinybio.cloud',
     license='MIT',
     packages=['tiny'],
     install_requires=dependencies,
